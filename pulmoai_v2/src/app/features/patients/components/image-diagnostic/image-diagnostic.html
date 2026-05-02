@@ -1,0 +1,168 @@
+<div class="grid gap-6 lg:grid-cols-[1fr_22rem]">
+  <section class="grid gap-4 sm:grid-cols-2">
+    @if (examinations().length === 0) {
+      <div
+        class="border-surface-200 bg-surface-0 dark:border-surface-700 dark:bg-surface-900 flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed p-12 text-center sm:col-span-2"
+      >
+        <div
+          class="bg-surface-100 dark:bg-surface-800 text-surface-400 flex h-14 w-14 items-center justify-center rounded-full"
+        >
+          <i class="pi pi-image text-xl"></i>
+        </div>
+        <p class="text-surface-500 dark:text-surface-300 text-sm">
+          {{ 'examinations.empty' | translate }}
+        </p>
+      </div>
+    } @else {
+      @for (exam of examinations(); track exam.id) {
+        <article
+          class="border-surface-200 bg-surface-0 dark:border-surface-700 dark:bg-surface-900 group flex flex-col overflow-hidden rounded-2xl border shadow-sm transition-shadow hover:shadow-md"
+        >
+          <div class="relative">
+            @if (exam.attachmentUrl) {
+              <img
+                [appAuthSrc]="exam.attachmentUrl"
+                alt=""
+                class="bg-surface-100 dark:bg-surface-800 aspect-square w-full object-cover"
+              />
+            } @else {
+              <div
+                class="bg-surface-100 dark:bg-surface-800 text-surface-400 flex aspect-square w-full items-center justify-center"
+              >
+                <i class="pi pi-image text-3xl"></i>
+              </div>
+            }
+            <span
+              class="absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full bg-black/55 px-2.5 py-1 text-[11px] font-semibold tracking-wide text-white uppercase backdrop-blur"
+            >
+              <i class="pi pi-image text-[10px]"></i>
+              {{ 'examType.' + exam.type | translate }}
+            </span>
+            <div class="absolute top-3 right-3">
+              <app-status-badge [status]="exam.status" />
+            </div>
+            <button
+              type="button"
+              class="absolute right-3 bottom-3 inline-flex h-8 w-8 items-center justify-center rounded-full bg-black/55 text-white opacity-0 backdrop-blur transition-opacity group-hover:opacity-100 hover:bg-rose-500"
+              (click)="remove(exam.id)"
+              [attr.aria-label]="'patients.delete' | translate"
+            >
+              <i class="pi pi-trash text-xs"></i>
+            </button>
+          </div>
+
+          <div class="flex flex-col gap-3 p-4">
+            <div class="flex items-center gap-1.5 text-surface-500 dark:text-surface-400 text-xs">
+              <i class="pi pi-clock text-[10px]"></i>
+              {{ exam.createdAt | date: 'medium' }}
+            </div>
+            @if (exam.notes) {
+              <p class="text-surface-700 dark:text-surface-200 text-sm">{{ exam.notes }}</p>
+            }
+            <app-ai-report-card [examination]="exam" />
+            @if (exam.status === 'pending' || exam.status === 'failed') {
+              <p-button
+                icon="pi pi-sparkles"
+                size="small"
+                [label]="'examinations.diagnose' | translate"
+                [outlined]="true"
+                (onClick)="analyze(exam.id)"
+              />
+            }
+          </div>
+        </article>
+      }
+    }
+  </section>
+
+  <aside
+    class="border-surface-200 bg-surface-0 dark:border-surface-700 dark:bg-surface-900 flex h-fit flex-col overflow-hidden rounded-2xl border shadow-sm"
+  >
+    <header
+      class="relative flex items-center gap-3 overflow-hidden bg-gradient-to-br from-sky-500 via-cyan-500 to-teal-500 px-5 py-4 text-white"
+    >
+      <div
+        class="absolute -top-8 -right-8 h-24 w-24 rounded-full bg-white/15 blur-2xl"
+        aria-hidden="true"
+      ></div>
+      <div
+        class="relative flex h-9 w-9 items-center justify-center rounded-lg bg-white/20 backdrop-blur"
+      >
+        <i class="pi pi-image text-sm"></i>
+      </div>
+      <div class="relative flex flex-col">
+        <h3 class="text-sm font-semibold">{{ 'examinations.create' | translate }}</h3>
+        <span class="text-[11px] text-white/80">
+          {{ 'examinations.imageDiagnostic' | translate }}
+        </span>
+      </div>
+    </header>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-3 p-5">
+      <div class="flex flex-col gap-1.5">
+        <label for="image-type" class="text-surface-600 dark:text-surface-300 text-xs font-medium">
+          {{ 'examinations.type' | translate }}
+        </label>
+        <p-select
+          inputId="image-type"
+          formControlName="type"
+          [options]="typeOptions"
+          optionValue="value"
+        >
+          <ng-template #selectedItem let-option>{{ option.labelKey | translate }}</ng-template>
+          <ng-template #item let-option>{{ option.labelKey | translate }}</ng-template>
+        </p-select>
+      </div>
+
+      <label class="flex flex-col gap-1.5">
+        <span class="text-surface-600 dark:text-surface-300 text-xs font-medium">
+          {{ 'examinations.notes' | translate }}
+        </span>
+        <textarea pTextarea formControlName="notes" rows="3"></textarea>
+      </label>
+
+      @if (selectedFile(); as file) {
+        <div
+          class="bg-primary-50 dark:bg-primary-950/30 border-primary-200 dark:border-primary-900/40 flex items-center justify-between gap-2 rounded-lg border px-3 py-2 text-sm"
+        >
+          <div class="flex min-w-0 items-center gap-2">
+            <i class="pi pi-image text-primary-600 dark:text-primary-400"></i>
+            <span class="truncate">{{ file.name }}</span>
+          </div>
+          <button type="button" class="text-surface-400 hover:text-rose-500" (click)="clearFile()">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+      } @else {
+        <label
+          class="border-surface-300 hover:border-primary-400 hover:bg-primary-50/60 dark:border-surface-600 dark:hover:bg-primary-950/30 flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed px-4 py-6 text-center text-sm transition-colors"
+        >
+          <div
+            class="bg-primary-100 text-primary-600 dark:bg-primary-950/40 dark:text-primary-400 flex h-10 w-10 items-center justify-center rounded-full"
+          >
+            <i class="pi pi-cloud-upload text-base"></i>
+          </div>
+          <span class="font-medium">{{ 'examinations.image.drop' | translate }}</span>
+          <span class="text-surface-500 text-xs">
+            {{ 'examinations.uploadHint' | translate }}
+          </span>
+          <input
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            class="sr-only"
+            (change)="onFileSelected($event)"
+          />
+        </label>
+      }
+
+      <p-button
+        type="submit"
+        icon="pi pi-sparkles"
+        [label]="'examinations.diagnose' | translate"
+        [loading]="submitting()"
+        [disabled]="!selectedFile() || form.invalid"
+        styleClass="w-full"
+      />
+    </form>
+  </aside>
+</div>

@@ -1,0 +1,231 @@
+<div
+  class="bg-surface-50 dark:bg-surface-950 grid h-dvh overflow-hidden transition-[grid-template-columns] duration-300"
+  [style.grid-template-columns]="sidebarCollapsed() ? '4.5rem 1fr' : '17rem 1fr'"
+>
+  <aside
+    class="border-surface-200 bg-surface-0 dark:border-surface-700 dark:bg-surface-900 relative flex h-dvh flex-col gap-1 overflow-y-auto overflow-x-hidden border-r py-6 transition-[padding] duration-300"
+    [class.px-4]="!sidebarCollapsed()"
+    [class.px-2]="sidebarCollapsed()"
+  >
+    <a
+      routerLink="/dashboard"
+      class="mb-8 flex items-center gap-3 px-2"
+      [class.justify-center]="sidebarCollapsed()"
+      [class.px-0]="sidebarCollapsed()"
+    >
+      <div
+        class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 via-cyan-500 to-teal-500 text-white shadow-lg shadow-sky-500/20"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          class="h-6 w-6"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M12 2v6" />
+          <path d="M9 5h6" />
+          <path d="M6 8a6 6 0 0 0 12 0" />
+          <path d="M6 8v6a6 6 0 0 0 6 6 4 4 0 0 0 4-4v-2" />
+          <circle cx="18" cy="14" r="2" />
+        </svg>
+      </div>
+      @if (!sidebarCollapsed()) {
+        <div class="flex flex-col overflow-hidden">
+          <span class="truncate text-base font-bold tracking-tight">{{ 'common.appName' | translate }}</span>
+          <span class="text-surface-400 dark:text-surface-500 truncate text-[11px] font-medium">
+            {{ 'common.appTagline' | translate }}
+          </span>
+        </div>
+      }
+    </a>
+
+    <nav class="flex flex-col gap-6">
+      <div class="flex flex-col gap-1.5">
+        @if (!sidebarCollapsed()) {
+          <span
+            class="text-surface-400 dark:text-surface-500 px-3 text-[10px] font-semibold tracking-[0.12em] uppercase"
+          >
+            {{ 'nav.section.main' | translate }}
+          </span>
+        }
+        @for (item of mainNavItems; track item.path) {
+          <a
+            [routerLink]="item.path"
+            routerLinkActive="nav-link-active"
+            #rla="routerLinkActive"
+            [attr.title]="sidebarCollapsed() ? (item.labelKey | translate) : null"
+            class="text-surface-600 hover:bg-surface-100 dark:text-surface-300 dark:hover:bg-surface-800/60 group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all"
+            [class.justify-center]="sidebarCollapsed()"
+          >
+            <span
+              class="absolute top-1.5 bottom-1.5 left-0 w-[3px] rounded-full bg-gradient-to-b from-sky-500 to-cyan-500 transition-opacity"
+              [class.opacity-100]="rla.isActive"
+              [class.opacity-0]="!rla.isActive"
+            ></span>
+            <i class="pi {{ item.icon }} shrink-0 text-base"></i>
+            @if (!sidebarCollapsed()) {
+              <span>{{ item.labelKey | translate }}</span>
+            }
+          </a>
+        }
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        @if (!sidebarCollapsed()) {
+          <span
+            class="text-surface-400 dark:text-surface-500 px-3 text-[10px] font-semibold tracking-[0.12em] uppercase"
+          >
+            {{ 'nav.section.clinical' | translate }}
+          </span>
+        }
+        @for (item of clinicalNavItems; track item.path) {
+          <a
+            [routerLink]="item.path"
+            routerLinkActive="nav-link-active"
+            #rla="routerLinkActive"
+            [attr.title]="sidebarCollapsed() ? (item.labelKey | translate) : null"
+            class="text-surface-600 hover:bg-surface-100 dark:text-surface-300 dark:hover:bg-surface-800/60 group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all"
+            [class.justify-center]="sidebarCollapsed()"
+          >
+            <span
+              class="absolute top-1.5 bottom-1.5 left-0 w-[3px] rounded-full bg-gradient-to-b from-sky-500 to-cyan-500 transition-opacity"
+              [class.opacity-100]="rla.isActive"
+              [class.opacity-0]="!rla.isActive"
+            ></span>
+            <i class="pi {{ item.icon }} shrink-0 text-base"></i>
+            @if (!sidebarCollapsed()) {
+              <span>{{ item.labelKey | translate }}</span>
+            }
+          </a>
+        }
+      </div>
+
+      @if (adminNavItems().length > 0) {
+        <div class="flex flex-col gap-1.5">
+          @if (!sidebarCollapsed()) {
+            <span
+              class="text-surface-400 dark:text-surface-500 px-3 text-[10px] font-semibold tracking-[0.12em] uppercase"
+            >
+              {{ 'nav.section.admin' | translate }}
+            </span>
+          }
+          @for (item of adminNavItems(); track item.path) {
+            <a
+              [routerLink]="item.path"
+              routerLinkActive="nav-link-active"
+              #rla="routerLinkActive"
+              [attr.title]="sidebarCollapsed() ? (item.labelKey | translate) : null"
+              class="text-surface-600 hover:bg-surface-100 dark:text-surface-300 dark:hover:bg-surface-800/60 group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all"
+              [class.justify-center]="sidebarCollapsed()"
+            >
+              <span
+                class="absolute top-1.5 bottom-1.5 left-0 w-[3px] rounded-full bg-gradient-to-b from-violet-500 to-fuchsia-500 transition-opacity"
+                [class.opacity-100]="rla.isActive"
+                [class.opacity-0]="!rla.isActive"
+              ></span>
+              <i class="pi {{ item.icon }} shrink-0 text-base"></i>
+              @if (!sidebarCollapsed()) {
+                <span>{{ item.labelKey | translate }}</span>
+              }
+            </a>
+          }
+        </div>
+      }
+    </nav>
+
+    @if (auth.user(); as user) {
+      <div
+        class="border-surface-200 dark:border-surface-700/60 mt-auto flex flex-col gap-3 rounded-xl border bg-gradient-to-br from-sky-50 to-cyan-50 dark:from-sky-950/30 dark:to-cyan-950/30"
+        [class.p-3]="!sidebarCollapsed()"
+        [class.p-2]="sidebarCollapsed()"
+        [attr.title]="sidebarCollapsed() ? user.fullName : null"
+      >
+        <div class="flex items-center gap-3" [class.justify-center]="sidebarCollapsed()">
+          <div
+            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-cyan-500 text-xs font-bold text-white shadow-sm"
+          >
+            {{ initials() }}
+          </div>
+          @if (!sidebarCollapsed()) {
+            <div class="flex min-w-0 flex-col">
+              <span class="text-surface-900 dark:text-surface-50 truncate text-sm font-semibold">
+                {{ user.fullName }}
+              </span>
+              <span class="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
+                <span class="inline-block h-1.5 w-1.5 rounded-full bg-emerald-600"></span>
+                {{ 'dashboard.online' | translate }}
+              </span>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </aside>
+
+  <div class="flex h-dvh flex-col overflow-hidden">
+    <header
+      class="border-surface-200 bg-surface-0 dark:border-surface-700 dark:bg-surface-900 flex shrink-0 items-center justify-between gap-3 border-b px-6 py-3"
+    >
+      <div class="flex items-center gap-4">
+        <button
+          type="button"
+          (click)="toggleSidebar()"
+          class="text-surface-500 hover:text-primary-600 hover:bg-surface-100 dark:hover:bg-surface-800 dark:text-surface-400 flex h-9 w-9 items-center justify-center rounded-lg transition-colors"
+          [attr.aria-label]="'common.toggleSidebar' | translate"
+        >
+          <i class="pi pi-bars text-base"></i>
+        </button>
+        <div class="flex flex-col">
+          @if (auth.user(); as user) {
+            <span class="text-surface-900 dark:text-surface-50 text-sm font-semibold">
+              {{ greetingKey() | translate }}, {{ user.fullName }}
+            </span>
+          }
+          <span class="text-surface-500 dark:text-surface-400 text-xs">
+            {{ today | date: 'fullDate' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <p-select
+          [options]="languageOptions"
+          [ngModel]="language.current()"
+          (ngModelChange)="onLanguageChange($event)"
+          optionValue="code"
+          [ariaLabel]="'language.label' | translate"
+          styleClass="!min-w-[8.5rem]"
+        >
+          <ng-template #selectedItem let-option>{{ option.labelKey | translate }}</ng-template>
+          <ng-template #item let-option>{{ option.labelKey | translate }}</ng-template>
+        </p-select>
+
+        <p-button
+          [icon]="theme.isDark() ? 'pi pi-sun' : 'pi pi-moon'"
+          [ariaLabel]="'theme.toggle' | translate"
+          severity="secondary"
+          [rounded]="true"
+          [text]="true"
+          (onClick)="toggleTheme()"
+        />
+
+        <p-button
+          icon="pi pi-sign-out"
+          [ariaLabel]="'auth.logout' | translate"
+          severity="secondary"
+          [text]="true"
+          [rounded]="true"
+          (onClick)="logout()"
+        />
+      </div>
+    </header>
+
+    <main class="flex-1 overflow-hidden">
+      <router-outlet />
+    </main>
+  </div>
+</div>

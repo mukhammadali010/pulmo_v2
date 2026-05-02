@@ -1,0 +1,302 @@
+<section class="flex h-full flex-col gap-6 overflow-y-auto p-6">
+  <header class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <div class="flex flex-col gap-1">
+      <h1 class="text-surface-900 dark:text-surface-50 text-2xl font-bold tracking-tight">
+        {{ 'admin.doctors.title' | translate }}
+      </h1>
+      <p class="text-surface-500 dark:text-surface-400 text-sm">
+        {{ 'admin.doctors.subtitle' | translate }}
+      </p>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-3">
+      <p-iconfield iconPosition="left" class="grow md:grow-0">
+        <p-inputicon class="pi pi-search" />
+        <input
+          pInputText
+          type="search"
+          [ngModel]="searchTerm()"
+          (ngModelChange)="onSearch($event)"
+          [placeholder]="'common.searchPlaceholder' | translate"
+          class="w-full md:w-72"
+        />
+      </p-iconfield>
+      <p-button
+        icon="pi pi-plus"
+        [label]="'admin.doctors.create' | translate"
+        (onClick)="openCreateDialog()"
+      />
+    </div>
+  </header>
+
+  <div
+    class="border-surface-200 bg-surface-0 dark:border-surface-700 dark:bg-surface-900 overflow-hidden rounded-2xl border shadow-sm"
+  >
+    <p-table [value]="filteredDoctors()" [loading]="loading()" dataKey="id" styleClass="!border-0">
+      <ng-template #header>
+        <tr>
+          <th>{{ 'admin.doctors.fullName' | translate }}</th>
+          <th>{{ 'admin.doctors.role' | translate }}</th>
+          <th>{{ 'admin.doctors.status' | translate }}</th>
+          <th class="text-center">{{ 'admin.doctors.patients' | translate }}</th>
+          <th class="text-center">{{ 'admin.doctors.examinations' | translate }}</th>
+          <th>{{ 'admin.doctors.createdAt' | translate }}</th>
+          <th class="w-32"></th>
+        </tr>
+      </ng-template>
+
+      <ng-template #body let-doctor>
+        <tr class="hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-colors">
+          <td>
+            <div class="flex items-center gap-3">
+              <div
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br {{ avatarGradient(doctor) }} text-xs font-bold text-white shadow-sm"
+              >
+                {{ initials(doctor) }}
+              </div>
+              <div class="flex flex-col">
+                <span class="font-medium">{{ doctor.fullName }}</span>
+                <span class="text-surface-500 dark:text-surface-400 text-xs">
+                  {{ doctor.email }}
+                </span>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span
+              class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium"
+              [class.bg-violet-100]="doctor.role === 'admin'"
+              [class.text-violet-700]="doctor.role === 'admin'"
+              [class.dark:bg-violet-950]="doctor.role === 'admin'"
+              [class.dark:text-violet-300]="doctor.role === 'admin'"
+              [class.bg-sky-100]="doctor.role === 'doctor'"
+              [class.text-sky-700]="doctor.role === 'doctor'"
+              [class.dark:bg-sky-950]="doctor.role === 'doctor'"
+              [class.dark:text-sky-300]="doctor.role === 'doctor'"
+            >
+              <i class="pi text-[10px]" [class.pi-shield]="doctor.role === 'admin'" [class.pi-user-md]="doctor.role === 'doctor'"></i>
+              {{ 'admin.doctors.role' + (doctor.role === 'admin' ? 'Admin' : 'Doctor') | translate }}
+            </span>
+          </td>
+          <td>
+            <span
+              class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium"
+              [class.bg-emerald-100]="doctor.isActive"
+              [class.text-emerald-700]="doctor.isActive"
+              [class.dark:bg-emerald-950]="doctor.isActive"
+              [class.dark:text-emerald-300]="doctor.isActive"
+              [class.bg-surface-100]="!doctor.isActive"
+              [class.text-surface-500]="!doctor.isActive"
+              [class.dark:bg-surface-800]="!doctor.isActive"
+              [class.dark:text-surface-400]="!doctor.isActive"
+            >
+              <span
+                class="h-1.5 w-1.5 rounded-full"
+                [class.bg-emerald-500]="doctor.isActive"
+                [class.bg-surface-400]="!doctor.isActive"
+              ></span>
+              {{ (doctor.isActive ? 'admin.doctors.active' : 'admin.doctors.inactive') | translate }}
+            </span>
+          </td>
+          <td class="text-center font-medium">{{ doctor.patientCount }}</td>
+          <td class="text-center font-medium">{{ doctor.examinationCount }}</td>
+          <td class="text-surface-600 dark:text-surface-300 whitespace-nowrap text-sm">
+            {{ doctor.createdAt | date: 'mediumDate' }}
+          </td>
+          <td>
+            <div class="flex items-center justify-end gap-1">
+              <p-button
+                icon="pi pi-pencil"
+                severity="secondary"
+                [text]="true"
+                [rounded]="true"
+                size="small"
+                [ariaLabel]="'admin.doctors.edit' | translate"
+                (onClick)="openEditDialog(doctor)"
+              />
+              <p-button
+                icon="pi pi-key"
+                severity="secondary"
+                [text]="true"
+                [rounded]="true"
+                size="small"
+                [ariaLabel]="'admin.doctors.resetPassword' | translate"
+                (onClick)="openResetDialog(doctor)"
+              />
+              @if (!isSelf(doctor)) {
+                <p-button
+                  [icon]="doctor.isActive ? 'pi pi-ban' : 'pi pi-check'"
+                  [severity]="doctor.isActive ? 'danger' : 'success'"
+                  [text]="true"
+                  [rounded]="true"
+                  size="small"
+                  [ariaLabel]="(doctor.isActive ? 'admin.doctors.deactivate' : 'admin.doctors.activate') | translate"
+                  (onClick)="toggleActive(doctor)"
+                />
+              }
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template #emptymessage>
+        <tr>
+          <td colspan="7" class="py-12">
+            <div class="flex flex-col items-center gap-3 text-center">
+              <div
+                class="bg-surface-100 dark:bg-surface-800 text-surface-400 flex h-14 w-14 items-center justify-center rounded-full"
+              >
+                <i class="pi pi-user-md text-xl"></i>
+              </div>
+              <p class="text-surface-500 dark:text-surface-400 text-sm">
+                {{ 'admin.doctors.empty' | translate }}
+              </p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</section>
+
+<!-- Create dialog -->
+<p-dialog
+  [visible]="dialogMode() === 'create'"
+  (visibleChange)="$event ? null : closeDialog()"
+  [dismissableMask]="!loading()"
+  [modal]="true"
+  [style]="{ width: '32rem' }"
+  [header]="'admin.doctors.create' | translate"
+  [draggable]="false"
+>
+  <form [formGroup]="form" (ngSubmit)="submitCreate()" class="flex flex-col gap-4">
+    <label class="flex flex-col gap-1">
+      <span class="text-sm font-medium">{{ 'admin.doctors.fullName' | translate }}</span>
+      <input pInputText type="text" formControlName="fullName" />
+    </label>
+
+    <label class="flex flex-col gap-1">
+      <span class="text-sm font-medium">{{ 'admin.doctors.email' | translate }}</span>
+      <input pInputText type="email" formControlName="email" autocomplete="off" />
+    </label>
+
+    <label class="flex flex-col gap-1">
+      <span class="text-sm font-medium">{{ 'admin.doctors.password' | translate }}</span>
+      <input pInputText type="password" formControlName="password" autocomplete="new-password" />
+      <span class="text-surface-500 text-xs">{{ 'admin.doctors.passwordHint' | translate }}</span>
+    </label>
+
+    <div class="flex flex-col gap-1">
+      <label for="role" class="text-sm font-medium">
+        {{ 'admin.doctors.role' | translate }}
+      </label>
+      <p-select
+        inputId="role"
+        formControlName="role"
+        [options]="roleOptions"
+        optionValue="value"
+      >
+        <ng-template #selectedItem let-option>{{ option.labelKey | translate }}</ng-template>
+        <ng-template #item let-option>{{ option.labelKey | translate }}</ng-template>
+      </p-select>
+    </div>
+
+    <div class="flex justify-end gap-2 pt-2">
+      <p-button
+        type="button"
+        severity="secondary"
+        [text]="true"
+        [label]="'common.cancel' | translate"
+        (onClick)="closeDialog()"
+      />
+      <p-button
+        type="submit"
+        [label]="'common.save' | translate"
+        [loading]="submitting()"
+        [disabled]="form.invalid"
+      />
+    </div>
+  </form>
+</p-dialog>
+
+<!-- Edit dialog -->
+<p-dialog
+  [visible]="dialogMode() === 'edit'"
+  (visibleChange)="$event ? null : closeDialog()"
+  [modal]="true"
+  [style]="{ width: '32rem' }"
+  [header]="'admin.doctors.edit' | translate"
+  [draggable]="false"
+>
+  <form [formGroup]="editForm" (ngSubmit)="submitEdit()" class="flex flex-col gap-4">
+    <label class="flex flex-col gap-1">
+      <span class="text-sm font-medium">{{ 'admin.doctors.fullName' | translate }}</span>
+      <input pInputText type="text" formControlName="fullName" />
+    </label>
+
+    <div class="flex flex-col gap-1">
+      <label for="edit-role" class="text-sm font-medium">
+        {{ 'admin.doctors.role' | translate }}
+      </label>
+      <p-select
+        inputId="edit-role"
+        formControlName="role"
+        [options]="roleOptions"
+        optionValue="value"
+      >
+        <ng-template #selectedItem let-option>{{ option.labelKey | translate }}</ng-template>
+        <ng-template #item let-option>{{ option.labelKey | translate }}</ng-template>
+      </p-select>
+    </div>
+
+    <div class="flex justify-end gap-2 pt-2">
+      <p-button
+        type="button"
+        severity="secondary"
+        [text]="true"
+        [label]="'common.cancel' | translate"
+        (onClick)="closeDialog()"
+      />
+      <p-button
+        type="submit"
+        [label]="'common.save' | translate"
+        [loading]="submitting()"
+        [disabled]="editForm.invalid"
+      />
+    </div>
+  </form>
+</p-dialog>
+
+<!-- Reset password dialog -->
+<p-dialog
+  [visible]="dialogMode() === 'reset'"
+  (visibleChange)="$event ? null : closeDialog()"
+  [modal]="true"
+  [style]="{ width: '28rem' }"
+  [header]="'admin.doctors.resetPassword' | translate"
+  [draggable]="false"
+>
+  <form [formGroup]="resetForm" (ngSubmit)="submitReset()" class="flex flex-col gap-4">
+    <label class="flex flex-col gap-1">
+      <span class="text-sm font-medium">{{ 'admin.doctors.newPassword' | translate }}</span>
+      <input pInputText type="password" formControlName="newPassword" autocomplete="new-password" />
+      <span class="text-surface-500 text-xs">{{ 'admin.doctors.passwordHint' | translate }}</span>
+    </label>
+
+    <div class="flex justify-end gap-2 pt-2">
+      <p-button
+        type="button"
+        severity="secondary"
+        [text]="true"
+        [label]="'common.cancel' | translate"
+        (onClick)="closeDialog()"
+      />
+      <p-button
+        type="submit"
+        [label]="'common.save' | translate"
+        [loading]="submitting()"
+        [disabled]="resetForm.invalid"
+      />
+    </div>
+  </form>
+</p-dialog>

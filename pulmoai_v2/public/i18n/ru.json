@@ -1,0 +1,205 @@
+{
+  "common": {
+    "appName": "PulmoAI",
+    "appTagline": "AI-ассистент пульмонолога",
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "delete": "Удалить",
+    "edit": "Изменить",
+    "search": "Поиск",
+    "searchPlaceholder": "Поиск...",
+    "loading": "Загрузка...",
+    "all": "Все",
+    "toggleSidebar": "Переключить боковую панель"
+  },
+  "theme": {
+    "light": "Светлая",
+    "dark": "Тёмная",
+    "toggle": "Сменить тему"
+  },
+  "language": {
+    "label": "Язык",
+    "uz": "O'zbekcha",
+    "ru": "Русский",
+    "en": "English"
+  },
+  "errors": {
+    "network": "Ошибка сети. Проверьте подключение к интернету.",
+    "server": "Ошибка сервера. Попробуйте позже.",
+    "unknown": "Произошла неизвестная ошибка."
+  },
+  "auth": {
+    "brand": {
+      "subtitle": "Интеллектуальный помощник пульмонолога",
+      "title": "Точная диагностика и быстрые решения для ваших пациентов.",
+      "description": "PulmoAI использует искусственный интеллект для анализа лёгочных снимков, выделения аномалий и подготовки полного отчёта для врача.",
+      "copyright": "Все права защищены.",
+      "features": {
+        "secure": "Безопасность уровня HIPAA и шифрование",
+        "fast": "Анализ КТ/МРТ за секунды",
+        "insights": "Динамика пациентов и статистика"
+      }
+    },
+    "login": {
+      "title": "Войдите в аккаунт",
+      "subtitle": "Введите email и пароль, чтобы продолжить.",
+      "email": "Email",
+      "emailPlaceholder": "doctor@clinic.com",
+      "password": "Пароль",
+      "passwordPlaceholder": "Ваш пароль",
+      "forgot": "Забыли пароль?",
+      "submit": "Войти",
+      "noAccount": "Нет аккаунта?",
+      "register": "Регистрация"
+    },
+    "logout": "Выйти"
+  },
+  "nav": {
+    "dashboard": "Главная",
+    "patients": "Пациенты",
+    "examinations": "Исследования",
+    "doctors": "Доктора",
+    "section": {
+      "main": "Основное",
+      "clinical": "Клиника",
+      "admin": "Управление",
+      "account": "Аккаунт"
+    }
+  },
+  "admin": {
+    "doctors": {
+      "title": "Доктора",
+      "subtitle": "Управление учётными записями докторов и администраторов",
+      "create": "Новый доктор",
+      "edit": "Изменить",
+      "deactivate": "Деактивировать",
+      "activate": "Активировать",
+      "resetPassword": "Сбросить пароль",
+      "fullName": "ФИО",
+      "email": "Email",
+      "password": "Пароль",
+      "newPassword": "Новый пароль",
+      "passwordHint": "Минимум 6 символов",
+      "role": "Роль",
+      "roleAdmin": "Админ",
+      "roleDoctor": "Доктор",
+      "status": "Статус",
+      "active": "Активен",
+      "inactive": "Не активен",
+      "createdAt": "Добавлен",
+      "patients": "Пациенты",
+      "examinations": "Исследования",
+      "empty": "Пока нет докторов.",
+      "deactivateConfirm": "Подтверждаете деактивацию аккаунта?",
+      "saved": "Доктор сохранён",
+      "updated": "Данные обновлены",
+      "deactivated": "Аккаунт деактивирован",
+      "activated": "Аккаунт активирован",
+      "passwordResetSuccess": "Пароль сброшен",
+      "selfActionError": "Это действие нельзя выполнить со своим аккаунтом"
+    },
+    "stats": {
+      "title": "Статистика системы",
+      "totalDoctors": "Всего докторов",
+      "activeDoctors": "Активных докторов",
+      "totalPatients": "Всего пациентов",
+      "totalExaminations": "Всего исследований"
+    }
+  },
+  "dashboard": {
+    "greetingMorning": "Доброе утро",
+    "greetingAfternoon": "Добрый день",
+    "greetingEvening": "Добрый вечер",
+    "welcomeSubtitle": "Готовы помочь вам с точной диагностикой ваших пациентов сегодня.",
+    "stats": {
+      "patients": "Пациенты",
+      "examinations": "Исследования",
+      "pending": "Ожидают анализа",
+      "completed": "Завершено"
+    },
+    "recentExaminations": "Последние исследования",
+    "noRecent": "Пока нет исследований.",
+    "viewAll": "Смотреть все",
+    "quickActions": "Быстрые действия",
+    "newPatient": "Добавить пациента",
+    "newExamination": "Создать исследование",
+    "online": "Система активна"
+  },
+  "patients": {
+    "title": "Пациенты",
+    "empty": "Пока нет пациентов.",
+    "create": "Новый пациент",
+    "fullName": "ФИО",
+    "dateOfBirth": "Дата рождения",
+    "gender": "Пол",
+    "phone": "Телефон",
+    "notes": "Примечание",
+    "createdAt": "Добавлен",
+    "years": "лет",
+    "delete": "Удалить",
+    "deleteConfirm": "Подтверждаете удаление?",
+    "saved": "Пациент сохранён",
+    "deleted": "Пациент удалён"
+  },
+  "gender": {
+    "male": "Мужской",
+    "female": "Женский",
+    "other": "Другой"
+  },
+  "examinations": {
+    "title": "Исследования",
+    "empty": "Пока нет исследований.",
+    "create": "Новое исследование",
+    "patient": "Пациент",
+    "type": "Тип",
+    "image": "Изображение",
+    "notes": "Примечание",
+    "uploadHint": "PNG, JPEG или WEBP — до 50 МБ",
+    "diagnose": "Поставить диагноз",
+    "reanalyze": "Повторить анализ",
+    "audioDiagnostic": "Аудио",
+    "imageDiagnostic": "Снимок",
+    "parameterDiagnostic": "Параметры",
+    "results": "Результаты",
+    "notDiagnosed": "Анализ ещё не выполнен",
+    "summaryLabel": "Краткое заключение",
+    "aiError": "Ошибка AI-анализа",
+    "detailed": "Подробнее",
+    "detailedReport": "Полный AI-отчёт",
+    "savePdf": "Сохранить PDF",
+    "pdfSaved": "PDF загружен",
+    "disclaimer": "Внимание: этот отчёт является вспомогательным инструментом, подготовленным ИИ, и не заменяет окончательный диагноз врача.",
+    "audio": {
+      "drop": "Загрузите аудиофайл",
+      "hint": "MP3, WAV, OGG или M4A"
+    },
+    "image": {
+      "drop": "Загрузите снимок"
+    },
+    "status": {
+      "label": "Статус",
+      "pending": "В ожидании",
+      "analyzing": "Анализ",
+      "done": "Готово",
+      "failed": "Ошибка"
+    },
+    "saved": "Исследование сохранено",
+    "deleted": "Исследование удалено"
+  },
+  "parameters": {
+    "fev1": "FEV₁",
+    "fvc": "FVC",
+    "fev1Fvc": "FEV₁/FVC",
+    "spo2": "SpO₂",
+    "heartRate": "Пульс",
+    "respiratoryRate": "ЧДД",
+    "temperature": "Температура",
+    "bmi": "ИМТ",
+    "atLeastOne": "Введите хотя бы один параметр"
+  },
+  "examType": {
+    "xray": "Рентген",
+    "ct": "КТ",
+    "mri": "МРТ"
+  }
+}

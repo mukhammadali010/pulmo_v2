@@ -1,0 +1,205 @@
+{
+  "common": {
+    "appName": "PulmoAI",
+    "appTagline": "AI assistant for pulmonologists",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search",
+    "searchPlaceholder": "Search...",
+    "loading": "Loading...",
+    "all": "All",
+    "toggleSidebar": "Toggle sidebar"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "toggle": "Toggle theme"
+  },
+  "language": {
+    "label": "Language",
+    "uz": "O'zbekcha",
+    "ru": "Русский",
+    "en": "English"
+  },
+  "errors": {
+    "network": "Network error. Please check your connection.",
+    "server": "Server error. Please try again later.",
+    "unknown": "An unknown error occurred."
+  },
+  "auth": {
+    "brand": {
+      "subtitle": "AI assistant for pulmonologists",
+      "title": "Sharper diagnoses and faster decisions for your patients.",
+      "description": "PulmoAI uses artificial intelligence to analyse lung imaging, surface anomalies, and deliver a complete report to the physician.",
+      "copyright": "All rights reserved.",
+      "features": {
+        "secure": "HIPAA-grade security and encryption",
+        "fast": "CT/MRI analysis in seconds",
+        "insights": "Patient trends and statistics"
+      }
+    },
+    "login": {
+      "title": "Sign in to your account",
+      "subtitle": "Enter your email and password to continue.",
+      "email": "Email",
+      "emailPlaceholder": "doctor@clinic.com",
+      "password": "Password",
+      "passwordPlaceholder": "Your password",
+      "forgot": "Forgot password?",
+      "submit": "Sign in",
+      "noAccount": "Don't have an account?",
+      "register": "Register"
+    },
+    "logout": "Sign out"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "patients": "Patients",
+    "examinations": "Examinations",
+    "doctors": "Doctors",
+    "section": {
+      "main": "Overview",
+      "clinical": "Clinical",
+      "admin": "Administration",
+      "account": "Account"
+    }
+  },
+  "admin": {
+    "doctors": {
+      "title": "Doctors",
+      "subtitle": "Manage doctor and admin accounts in the system",
+      "create": "New doctor",
+      "edit": "Edit",
+      "deactivate": "Deactivate",
+      "activate": "Activate",
+      "resetPassword": "Reset password",
+      "fullName": "Full name",
+      "email": "Email",
+      "password": "Password",
+      "newPassword": "New password",
+      "passwordHint": "At least 6 characters",
+      "role": "Role",
+      "roleAdmin": "Admin",
+      "roleDoctor": "Doctor",
+      "status": "Status",
+      "active": "Active",
+      "inactive": "Inactive",
+      "createdAt": "Added",
+      "patients": "Patients",
+      "examinations": "Examinations",
+      "empty": "No doctors yet.",
+      "deactivateConfirm": "Confirm deactivating this account?",
+      "saved": "Doctor saved",
+      "updated": "Doctor updated",
+      "deactivated": "Account deactivated",
+      "activated": "Account activated",
+      "passwordResetSuccess": "Password reset",
+      "selfActionError": "You can't perform this action on your own account"
+    },
+    "stats": {
+      "title": "System statistics",
+      "totalDoctors": "Total doctors",
+      "activeDoctors": "Active doctors",
+      "totalPatients": "Total patients",
+      "totalExaminations": "Total examinations"
+    }
+  },
+  "dashboard": {
+    "greetingMorning": "Good morning",
+    "greetingAfternoon": "Good afternoon",
+    "greetingEvening": "Good evening",
+    "welcomeSubtitle": "Ready to help you deliver sharper diagnoses to your patients today.",
+    "stats": {
+      "patients": "Patients",
+      "examinations": "Examinations",
+      "pending": "Awaiting analysis",
+      "completed": "Completed"
+    },
+    "recentExaminations": "Recent examinations",
+    "noRecent": "No examinations yet.",
+    "viewAll": "View all",
+    "quickActions": "Quick actions",
+    "newPatient": "Add new patient",
+    "newExamination": "Start examination",
+    "online": "System online"
+  },
+  "patients": {
+    "title": "Patients",
+    "empty": "No patients yet.",
+    "create": "New patient",
+    "fullName": "Full name",
+    "dateOfBirth": "Date of birth",
+    "gender": "Gender",
+    "phone": "Phone",
+    "notes": "Notes",
+    "createdAt": "Added",
+    "years": "yrs",
+    "delete": "Delete",
+    "deleteConfirm": "Confirm delete?",
+    "saved": "Patient saved",
+    "deleted": "Patient deleted"
+  },
+  "gender": {
+    "male": "Male",
+    "female": "Female",
+    "other": "Other"
+  },
+  "examinations": {
+    "title": "Examinations",
+    "empty": "No examinations yet.",
+    "create": "New examination",
+    "patient": "Patient",
+    "type": "Type",
+    "image": "Image",
+    "notes": "Notes",
+    "uploadHint": "PNG, JPEG or WEBP — up to 50 MB",
+    "diagnose": "Make diagnosis",
+    "reanalyze": "Re-analyze",
+    "audioDiagnostic": "Audio",
+    "imageDiagnostic": "Imaging",
+    "parameterDiagnostic": "Parameters",
+    "results": "Results",
+    "notDiagnosed": "Not analysed yet",
+    "summaryLabel": "Summary",
+    "aiError": "AI analysis error",
+    "detailed": "Read more",
+    "detailedReport": "Full AI report",
+    "savePdf": "Save as PDF",
+    "pdfSaved": "PDF downloaded",
+    "disclaimer": "Disclaimer: this report is an AI-generated decision-support tool and does not replace a physician's final diagnosis.",
+    "audio": {
+      "drop": "Upload audio file",
+      "hint": "MP3, WAV, OGG or M4A"
+    },
+    "image": {
+      "drop": "Upload image"
+    },
+    "status": {
+      "label": "Status",
+      "pending": "Pending",
+      "analyzing": "Analyzing",
+      "done": "Done",
+      "failed": "Failed"
+    },
+    "saved": "Examination saved",
+    "deleted": "Examination deleted"
+  },
+  "parameters": {
+    "fev1": "FEV₁",
+    "fvc": "FVC",
+    "fev1Fvc": "FEV₁/FVC",
+    "spo2": "SpO₂",
+    "heartRate": "Heart rate",
+    "respiratoryRate": "Resp. rate",
+    "temperature": "Temperature",
+    "bmi": "BMI",
+    "atLeastOne": "Enter at least one parameter"
+  },
+  "examType": {
+    "xray": "X-ray",
+    "ct": "CT",
+    "mri": "MRI"
+  }
+}

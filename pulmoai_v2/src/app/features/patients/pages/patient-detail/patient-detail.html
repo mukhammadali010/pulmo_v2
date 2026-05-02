@@ -1,0 +1,128 @@
+@if (loading()) {
+  <div class="flex h-64 items-center justify-center">
+    <i class="pi pi-spin pi-spinner text-primary-500 text-3xl"></i>
+  </div>
+} @else if (patient(); as p) {
+  <div class="flex h-full flex-col gap-4 overflow-hidden p-6">
+    <div class="shrink-0 flex flex-col gap-3">
+      <a
+        routerLink="/patients"
+        class="text-surface-500 hover:text-primary-500 inline-flex w-fit items-center gap-1.5 text-sm"
+      >
+        <i class="pi pi-arrow-left text-xs"></i>
+        {{ 'patients.title' | translate }}
+      </a>
+
+      <header
+        class="border-surface-200 bg-surface-0 dark:border-surface-700 dark:bg-surface-900 flex items-center gap-4 rounded-2xl border p-4 shadow-sm"
+      >
+      <div
+        class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 via-cyan-500 to-teal-500 text-lg font-semibold text-white shadow-md shadow-sky-500/20"
+      >
+        {{ initials() }}
+      </div>
+      <div class="flex flex-1 flex-col gap-1 min-w-0">
+        <div class="flex flex-wrap items-center gap-2">
+          <h1 class="text-surface-900 dark:text-surface-50 truncate text-lg font-semibold tracking-tight">
+            {{ p.fullName }}
+          </h1>
+          @if (p.gender) {
+            <span
+              class="bg-surface-100 text-surface-700 dark:bg-surface-800 dark:text-surface-200 rounded-full px-2 py-0.5 text-[11px] font-medium"
+            >
+              {{ 'gender.' + p.gender | translate }}
+            </span>
+          }
+          @if (age() !== null) {
+            <span
+              class="bg-surface-100 text-surface-700 dark:bg-surface-800 dark:text-surface-200 rounded-full px-2 py-0.5 text-[11px] font-medium"
+            >
+              {{ age() }} {{ 'patients.years' | translate }}
+            </span>
+          }
+        </div>
+
+        <div
+          class="text-surface-500 dark:text-surface-400 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs"
+        >
+          @if (p.dateOfBirth) {
+            <span class="inline-flex items-center gap-1">
+              <i class="pi pi-calendar text-[10px]"></i>
+              {{ p.dateOfBirth | date: 'mediumDate' }}
+            </span>
+          }
+          @if (p.phone) {
+            <span class="inline-flex items-center gap-1">
+              <i class="pi pi-phone text-[10px]"></i>
+              {{ p.phone }}
+            </span>
+          }
+          @if (p.notes) {
+            <span class="inline-flex items-center gap-1 truncate">
+              <i class="pi pi-file-edit text-[10px]"></i>
+              <span class="truncate">{{ p.notes }}</span>
+            </span>
+          }
+        </div>
+      </div>
+    </header>
+    </div>
+
+    <p-tabs value="audio" class="patient-tabs flex flex-1 flex-col min-h-0 overflow-hidden">
+      <p-tablist>
+        <p-tab value="audio">
+          <i class="pi pi-microphone mr-2"></i>
+          {{ 'examinations.audioDiagnostic' | translate }}
+          @if (audio().length > 0) {
+            <span
+              class="bg-primary-100 text-primary-700 dark:bg-primary-950/50 dark:text-primary-300 ml-2 rounded-full px-2 py-0.5 text-xs font-medium"
+            >
+              {{ audio().length }}
+            </span>
+          }
+        </p-tab>
+        <p-tab value="image">
+          <i class="pi pi-image mr-2"></i>
+          {{ 'examinations.imageDiagnostic' | translate }}
+          @if (images().length > 0) {
+            <span
+              class="bg-primary-100 text-primary-700 dark:bg-primary-950/50 dark:text-primary-300 ml-2 rounded-full px-2 py-0.5 text-xs font-medium"
+            >
+              {{ images().length }}
+            </span>
+          }
+        </p-tab>
+        <p-tab value="parameters">
+          <i class="pi pi-chart-line mr-2"></i>
+          {{ 'examinations.parameterDiagnostic' | translate }}
+          @if (parameters().length > 0) {
+            <span
+              class="bg-primary-100 text-primary-700 dark:bg-primary-950/50 dark:text-primary-300 ml-2 rounded-full px-2 py-0.5 text-xs font-medium"
+            >
+              {{ parameters().length }}
+            </span>
+          }
+        </p-tab>
+        <p-tab value="results">
+          <i class="pi pi-history mr-2"></i>
+          {{ 'examinations.results' | translate }}
+        </p-tab>
+      </p-tablist>
+
+      <p-tabpanels>
+        <p-tabpanel value="audio">
+          <app-audio-diagnostic [patientId]="p.id" [examinations]="audio()" />
+        </p-tabpanel>
+        <p-tabpanel value="image">
+          <app-image-diagnostic [patientId]="p.id" [examinations]="images()" />
+        </p-tabpanel>
+        <p-tabpanel value="parameters">
+          <app-parameter-diagnostic [patientId]="p.id" [examinations]="parameters()" />
+        </p-tabpanel>
+        <p-tabpanel value="results">
+          <app-results-timeline [examinations]="examinations()" />
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+  </div>
+}

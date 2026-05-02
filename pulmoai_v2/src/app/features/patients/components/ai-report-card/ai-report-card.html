@@ -1,0 +1,126 @@
+@if (isFailed()) {
+  <div
+    class="flex flex-col gap-1 rounded-lg bg-rose-50 p-3 text-xs text-rose-900 dark:bg-rose-950/40 dark:text-rose-200"
+  >
+    <div class="flex items-center gap-1 font-semibold tracking-wide uppercase">
+      <i class="pi pi-exclamation-triangle"></i>
+      {{ 'examinations.aiError' | translate }}
+    </div>
+    <p class="opacity-80">{{ examination().aiReport }}</p>
+  </div>
+} @else if (hasReport()) {
+  <div
+    class="flex flex-col gap-3 rounded-lg bg-primary-50 p-3 text-sm text-primary-900 dark:bg-primary-950/40 dark:text-primary-200"
+  >
+    <div class="flex items-center justify-between gap-2">
+      <div class="flex items-center gap-1 text-xs font-semibold tracking-wide uppercase">
+        <i class="pi pi-sparkles"></i>
+        AI {{ 'examinations.summaryLabel' | translate }}
+      </div>
+      @if (canReanalyze()) {
+        <button
+          type="button"
+          (click)="reanalyze()"
+          [disabled]="reanalyzing()"
+          [attr.aria-label]="'examinations.reanalyze' | translate"
+          class="text-primary-600 hover:text-primary-700 dark:text-primary-300 dark:hover:text-primary-200 inline-flex items-center gap-1 text-[11px] font-medium transition-colors disabled:opacity-50"
+        >
+          <i class="pi text-[10px]" [class.pi-refresh]="!reanalyzing()" [class.pi-spin]="reanalyzing()" [class.pi-spinner]="reanalyzing()"></i>
+          {{ 'examinations.reanalyze' | translate }}
+        </button>
+      }
+    </div>
+
+    @if (examination().aiSummary) {
+      <markdown
+        class="prose prose-sm dark:prose-invert max-w-none"
+        [data]="examination().aiSummary"
+      />
+    }
+
+    @if (examination().aiReport) {
+      <p-button
+        size="small"
+        severity="secondary"
+        icon="pi pi-file-pdf"
+        [label]="'examinations.detailed' | translate"
+        [text]="true"
+        (onClick)="open()"
+        styleClass="self-start"
+      />
+    }
+  </div>
+}
+
+<p-dialog
+  [(visible)]="dialogVisible"
+  [modal]="true"
+  [style]="{ width: '60rem', maxWidth: '95vw' }"
+  [draggable]="false"
+  [dismissableMask]="true"
+  [header]="'examinations.detailedReport' | translate"
+>
+  <div
+    [id]="'ai-report-pdf-' + examination().id"
+    class="text-surface-900 flex flex-col gap-4 bg-white p-6"
+  >
+    <header class="border-surface-200 flex flex-col gap-1 border-b pb-4">
+      <h2 class="text-xl font-semibold">{{ 'examinations.detailedReport' | translate }}</h2>
+      @if (patient(); as p) {
+        <p class="text-surface-600 text-sm">{{ p.fullName }}</p>
+      }
+      <p class="text-surface-500 text-xs">
+        {{ 'examType.' + examination().type | translate }} ·
+        {{ examination().createdAt | date: 'medium' }}
+      </p>
+    </header>
+
+    @if (examination().aiSummary) {
+      <section class="bg-primary-50 rounded-lg p-3 text-sm">
+        <div class="text-primary-700 mb-1 text-xs font-semibold uppercase">
+          {{ 'examinations.summaryLabel' | translate }}
+        </div>
+        <markdown class="prose prose-sm max-w-none" [data]="examination().aiSummary" />
+      </section>
+    }
+
+    @if (examination().aiReport) {
+      <section>
+        <markdown class="prose max-w-none" [data]="examination().aiReport" />
+      </section>
+    }
+
+    <footer class="border-surface-200 text-surface-500 mt-4 border-t pt-3 text-xs">
+      {{ 'examinations.disclaimer' | translate }}
+    </footer>
+  </div>
+
+  <div class="flex flex-wrap justify-between gap-2 pt-4">
+    @if (canReanalyze()) {
+      <p-button
+        icon="pi pi-refresh"
+        [label]="'examinations.reanalyze' | translate"
+        severity="secondary"
+        [outlined]="true"
+        [loading]="reanalyzing()"
+        (onClick)="reanalyze()"
+      />
+    } @else {
+      <span></span>
+    }
+    <div class="flex gap-2">
+      <p-button
+        [label]="'common.cancel' | translate"
+        severity="secondary"
+        [text]="true"
+        (onClick)="dialogVisible.set(false)"
+      />
+      <p-button
+        icon="pi pi-download"
+        [label]="'examinations.savePdf' | translate"
+        [loading]="exporting()"
+        (onClick)="exportPdf()"
+      />
+    </div>
+  </div>
+</p-dialog>

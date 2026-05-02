@@ -1,0 +1,71 @@
+<div class="grid min-h-dvh lg:grid-cols-2">
+  <aside
+    class="relative hidden flex-col justify-between overflow-hidden bg-gradient-to-br from-sky-600 via-blue-600 to-cyan-500 p-10 text-white lg:flex"
+  >
+    <div
+      class="pointer-events-none absolute -top-24 -right-24 h-96 w-96 rounded-full bg-white/10 blur-3xl"
+    ></div>
+    <div
+      class="pointer-events-none absolute -bottom-32 -left-16 h-96 w-96 rounded-full bg-cyan-300/20 blur-3xl"
+    ></div>
+
+    <div class="relative flex items-center gap-3">
+      <div
+        class="flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/30 backdrop-blur-sm"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          class="h-6 w-6"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M12 2v6" />
+          <path d="M9 5h6" />
+          <path d="M6 8a6 6 0 0 0 12 0" />
+          <path d="M6 8v6a6 6 0 0 0 6 6 4 4 0 0 0 4-4v-2" />
+          <circle cx="18" cy="14" r="2" />
+        </svg>
+      </div>
+      <div>
+        <p class="text-lg leading-none font-semibold">{{ 'common.appName' | translate }}</p>
+        <p class="text-xs text-white/70">{{ 'auth.brand.subtitle' | translate }}</p>
+      </div>
+    </div>
+
+    <div class="relative flex flex-col gap-6">
+      <h2 class="text-3xl leading-tight font-semibold">
+        {{ 'auth.brand.title' | translate }}
+      </h2>
+      <p class="max-w-md text-base leading-relaxed text-white/80">
+        {{ 'auth.brand.description' | translate }}
+      </p>
+
+      <ul class="flex flex-col gap-3 pt-2">
+        @for (feature of features; track feature.key) {
+          <li class="flex items-center gap-3 text-sm">
+            <span
+              class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/15 ring-1 ring-white/25"
+            >
+              <i class="pi {{ feature.icon }} text-base"></i>
+            </span>
+            <span>{{ feature.key | translate }}</span>
+          </li>
+        }
+      </ul>
+    </div>
+
+    <div class="relative text-xs text-white/60">
+      © {{ year }} {{ 'common.appName' | translate }}. {{ 'auth.brand.copyright' | translate }}
+    </div>
+  </aside>
+
+  <section class="bg-surface-50 dark:bg-surface-950 flex items-center justify-center p-6">
+    <div class="w-full max-w-md">
+      <router-outlet />
+    </div>
+  </section>
+</div>

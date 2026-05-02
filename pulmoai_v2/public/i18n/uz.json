@@ -1,0 +1,205 @@
+{
+  "common": {
+    "appName": "PulmoAI",
+    "appTagline": "Pulmonologiya AI yordamchisi",
+    "save": "Saqlash",
+    "cancel": "Bekor qilish",
+    "delete": "O'chirish",
+    "edit": "Tahrirlash",
+    "search": "Qidirish",
+    "searchPlaceholder": "Qidirish...",
+    "loading": "Yuklanmoqda...",
+    "all": "Barchasi",
+    "toggleSidebar": "Yon panelni almashtirish"
+  },
+  "theme": {
+    "light": "Yorug'",
+    "dark": "Qorong'i",
+    "toggle": "Mavzuni almashtirish"
+  },
+  "language": {
+    "label": "Til",
+    "uz": "O'zbekcha",
+    "ru": "Русский",
+    "en": "English"
+  },
+  "errors": {
+    "network": "Tarmoq xatosi. Internet ulanishingizni tekshiring.",
+    "server": "Server xatosi. Iltimos keyinroq urinib ko'ring.",
+    "unknown": "Noma'lum xato yuz berdi."
+  },
+  "auth": {
+    "brand": {
+      "subtitle": "Pulmonologiya bo'yicha aqlli yordamchi",
+      "title": "Bemorlaringiz uchun aniqroq tashxis va tezkor qarorlar.",
+      "description": "PulmoAI sun'iy intellekt yordamida o'pka tasvirlarini tahlil qiladi, anomaliyalarni belgilab beradi va shifokorga to'liq hisobot taqdim etadi.",
+      "copyright": "Barcha huquqlar himoyalangan.",
+      "features": {
+        "secure": "HIPAA darajasidagi xavfsizlik va shifrlash",
+        "fast": "Bir necha soniyada CT/MRI tahlili",
+        "insights": "Bemor dinamikasi va statistika"
+      }
+    },
+    "login": {
+      "title": "Akkountingizga kiring",
+      "subtitle": "Davom etish uchun email va parolingizni kiriting.",
+      "email": "Email",
+      "emailPlaceholder": "shifokor@klinika.uz",
+      "password": "Parol",
+      "passwordPlaceholder": "Parolingiz",
+      "forgot": "Parolni unutdingizmi?",
+      "submit": "Kirish",
+      "noAccount": "Akkountingiz yo'qmi?",
+      "register": "Ro'yxatdan o'tish"
+    },
+    "logout": "Chiqish"
+  },
+  "nav": {
+    "dashboard": "Bosh sahifa",
+    "patients": "Bemorlar",
+    "examinations": "Tekshiruvlar",
+    "doctors": "Doktorlar",
+    "section": {
+      "main": "Asosiy",
+      "clinical": "Klinika",
+      "admin": "Boshqaruv",
+      "account": "Akkaunt"
+    }
+  },
+  "admin": {
+    "doctors": {
+      "title": "Doktorlar",
+      "subtitle": "Tizimdagi doktorlar va admin foydalanuvchilarni boshqarish",
+      "create": "Yangi doktor",
+      "edit": "Tahrirlash",
+      "deactivate": "O'chirish",
+      "activate": "Faollashtirish",
+      "resetPassword": "Parolni qayta o'rnatish",
+      "fullName": "F.I.Sh.",
+      "email": "Email",
+      "password": "Parol",
+      "newPassword": "Yangi parol",
+      "passwordHint": "Kamida 6 ta belgi",
+      "role": "Roli",
+      "roleAdmin": "Admin",
+      "roleDoctor": "Doktor",
+      "status": "Holat",
+      "active": "Faol",
+      "inactive": "Faol emas",
+      "createdAt": "Qo'shilgan",
+      "patients": "Bemorlar",
+      "examinations": "Tekshiruvlar",
+      "empty": "Hali doktorlar qo'shilmagan.",
+      "deactivateConfirm": "Bu akkauntni o'chirishni tasdiqlaysizmi?",
+      "saved": "Doktor saqlandi",
+      "updated": "Ma'lumotlar yangilandi",
+      "deactivated": "Akkaunt o'chirildi",
+      "activated": "Akkaunt faollashtirildi",
+      "passwordResetSuccess": "Parol qayta o'rnatildi",
+      "selfActionError": "O'z akkauntingizga bunday amal bajarib bo'lmaydi"
+    },
+    "stats": {
+      "title": "Tizim statistikasi",
+      "totalDoctors": "Jami doktorlar",
+      "activeDoctors": "Faol doktorlar",
+      "totalPatients": "Jami bemorlar",
+      "totalExaminations": "Jami tekshiruvlar"
+    }
+  },
+  "dashboard": {
+    "greetingMorning": "Xayrli tong",
+    "greetingAfternoon": "Xayrli kun",
+    "greetingEvening": "Xayrli kech",
+    "welcomeSubtitle": "Bugun bemorlaringiz uchun aniqroq tashxis qo'yishga tayyormiz.",
+    "stats": {
+      "patients": "Bemorlar",
+      "examinations": "Tekshiruvlar",
+      "pending": "Tahlil kutilmoqda",
+      "completed": "Yakunlangan"
+    },
+    "recentExaminations": "So'nggi tekshiruvlar",
+    "noRecent": "Hali tekshiruvlar mavjud emas.",
+    "viewAll": "Barchasini ko'rish",
+    "quickActions": "Tezkor amallar",
+    "newPatient": "Yangi bemor qo'shish",
+    "newExamination": "Yangi tekshiruv yaratish",
+    "online": "Tizim faol"
+  },
+  "patients": {
+    "title": "Bemorlar",
+    "empty": "Hali bemorlar qo'shilmagan.",
+    "create": "Yangi bemor",
+    "fullName": "F.I.Sh.",
+    "dateOfBirth": "Tug'ilgan sana",
+    "gender": "Jinsi",
+    "phone": "Telefon",
+    "notes": "Qo'shimcha eslatma",
+    "createdAt": "Qo'shilgan",
+    "years": "yosh",
+    "delete": "O'chirish",
+    "deleteConfirm": "O'chirishni tasdiqlaysizmi?",
+    "saved": "Bemor saqlandi",
+    "deleted": "Bemor o'chirildi"
+  },
+  "gender": {
+    "male": "Erkak",
+    "female": "Ayol",
+    "other": "Boshqa"
+  },
+  "examinations": {
+    "title": "Tekshiruvlar",
+    "empty": "Hali tekshiruvlar mavjud emas.",
+    "create": "Yangi tekshiruv",
+    "patient": "Bemor",
+    "type": "Turi",
+    "image": "Tasvir",
+    "notes": "Eslatma",
+    "uploadHint": "PNG, JPEG yoki WEBP — 50 MB gacha",
+    "diagnose": "Tashxis qo'yish",
+    "reanalyze": "Qayta tahlil qilish",
+    "audioDiagnostic": "Audio tashxis",
+    "imageDiagnostic": "Tasvir tashxisi",
+    "parameterDiagnostic": "Parametrlar tashxisi",
+    "results": "Natijalar",
+    "notDiagnosed": "Hali tahlil qilinmagan",
+    "summaryLabel": "Qisqacha xulosa",
+    "aiError": "AI tahlil xatosi",
+    "detailed": "Batafsil",
+    "detailedReport": "To'liq AI tashxis hisoboti",
+    "savePdf": "PDF saqlash",
+    "pdfSaved": "PDF yuklab olindi",
+    "disclaimer": "Diqqat: bu hisobot AI tomonidan tayyorlangan qaror qabul qilishga yordamchi vositadir va shifokorning yakuniy tashxisini almashtirmaydi.",
+    "audio": {
+      "drop": "Audio faylni yuklash",
+      "hint": "MP3, WAV, OGG yoki M4A"
+    },
+    "image": {
+      "drop": "Tasvirni yuklash"
+    },
+    "status": {
+      "label": "Holat",
+      "pending": "Kutilmoqda",
+      "analyzing": "Tahlilda",
+      "done": "Tayyor",
+      "failed": "Xato"
+    },
+    "saved": "Tekshiruv saqlandi",
+    "deleted": "Tekshiruv o'chirildi"
+  },
+  "parameters": {
+    "fev1": "FEV₁",
+    "fvc": "FVC",
+    "fev1Fvc": "FEV₁/FVC",
+    "spo2": "SpO₂",
+    "heartRate": "Puls",
+    "respiratoryRate": "Nafas tezligi",
+    "temperature": "Harorat",
+    "bmi": "BMI",
+    "atLeastOne": "Kamida bitta parametr kiriting"
+  },
+  "examType": {
+    "xray": "Rentgen",
+    "ct": "CT",
+    "mri": "MRI"
+  }
+}

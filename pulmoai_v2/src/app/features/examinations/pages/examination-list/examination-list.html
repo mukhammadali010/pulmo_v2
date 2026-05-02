@@ -1,0 +1,130 @@
+<section class="flex h-full flex-col gap-6 overflow-y-auto p-6">
+  <header class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <div class="flex flex-col gap-1">
+      <h1 class="text-surface-900 dark:text-surface-50 text-2xl font-bold tracking-tight">
+        {{ 'examinations.title' | translate }}
+      </h1>
+      <p class="text-surface-500 dark:text-surface-400 text-sm">
+        {{ examinations().length }} {{ 'examinations.title' | translate }}
+      </p>
+    </div>
+
+    <p-iconfield iconPosition="left" class="grow md:grow-0">
+      <p-inputicon class="pi pi-search" />
+      <input
+        pInputText
+        type="search"
+        [ngModel]="searchTerm()"
+        (ngModelChange)="onSearch($event)"
+        [placeholder]="'common.searchPlaceholder' | translate"
+        class="w-full md:w-72"
+      />
+    </p-iconfield>
+  </header>
+
+  <div
+    class="border-surface-200 bg-surface-0 dark:border-surface-700 dark:bg-surface-900 overflow-hidden rounded-2xl border shadow-sm"
+  >
+    <p-table
+      [value]="filteredExaminations()"
+      [loading]="loading()"
+      dataKey="id"
+      styleClass="!border-0"
+    >
+      <ng-template #header>
+        <tr>
+          <th>{{ 'examinations.patient' | translate }}</th>
+          <th>{{ 'examinations.type' | translate }}</th>
+          <th>{{ 'examinations.status.label' | translate }}</th>
+          <th>{{ 'examinations.notes' | translate }}</th>
+          <th>{{ 'patients.createdAt' | translate }}</th>
+        </tr>
+      </ng-template>
+
+      <ng-template #body let-exam>
+        <tr
+          class="hover:bg-surface-50 dark:hover:bg-surface-800/50 cursor-pointer transition-colors"
+          (click)="openPatient(exam.patientId)"
+        >
+          <td>
+            <div class="flex items-center gap-3">
+              <div
+                class="bg-surface-100 dark:bg-surface-800 text-surface-600 dark:text-surface-300 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold"
+              >
+                {{ initials(patientNameById().get(exam.patientId) ?? '') }}
+              </div>
+              <span class="font-medium">
+                {{ patientNameById().get(exam.patientId) ?? '—' }}
+              </span>
+            </div>
+          </td>
+          <td>
+            <div class="inline-flex items-center gap-2">
+              <span
+                class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br {{ typeAccent(exam.type) }} text-white shadow-sm"
+              >
+                <i class="pi {{ typeIcon(exam.type) }} text-xs"></i>
+              </span>
+              <span class="text-surface-700 dark:text-surface-200 text-sm font-medium">
+                {{ typeLabelKey(exam.type) | translate }}
+              </span>
+            </div>
+          </td>
+          <td>
+            <span
+              class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium"
+              [class.bg-blue-100]="exam.status === 'pending'"
+              [class.text-blue-700]="exam.status === 'pending'"
+              [class.dark:bg-blue-950]="exam.status === 'pending'"
+              [class.dark:text-blue-300]="exam.status === 'pending'"
+              [class.bg-amber-100]="exam.status === 'analyzing'"
+              [class.text-amber-700]="exam.status === 'analyzing'"
+              [class.dark:bg-amber-950]="exam.status === 'analyzing'"
+              [class.dark:text-amber-300]="exam.status === 'analyzing'"
+              [class.bg-emerald-100]="exam.status === 'done'"
+              [class.text-emerald-700]="exam.status === 'done'"
+              [class.dark:bg-emerald-950]="exam.status === 'done'"
+              [class.dark:text-emerald-300]="exam.status === 'done'"
+              [class.bg-rose-100]="exam.status === 'failed'"
+              [class.text-rose-700]="exam.status === 'failed'"
+              [class.dark:bg-rose-950]="exam.status === 'failed'"
+              [class.dark:text-rose-300]="exam.status === 'failed'"
+            >
+              <span
+                class="h-1.5 w-1.5 rounded-full"
+                [class.bg-blue-500]="exam.status === 'pending'"
+                [class.bg-amber-500]="exam.status === 'analyzing'"
+                [class.bg-emerald-500]="exam.status === 'done'"
+                [class.bg-rose-500]="exam.status === 'failed'"
+              ></span>
+              {{ 'examinations.status.' + exam.status | translate }}
+            </span>
+          </td>
+          <td class="text-surface-500 dark:text-surface-300 max-w-md truncate text-sm">
+            {{ exam.notes || '—' }}
+          </td>
+          <td class="text-surface-600 dark:text-surface-300 text-sm whitespace-nowrap">
+            {{ exam.createdAt | date: 'short' }}
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template #emptymessage>
+        <tr>
+          <td colspan="5" class="py-12">
+            <div class="flex flex-col items-center gap-3 text-center">
+              <div
+                class="bg-surface-100 dark:bg-surface-800 text-surface-400 flex h-14 w-14 items-center justify-center rounded-full"
+              >
+                <i class="pi pi-microchip-ai text-xl"></i>
+              </div>
+              <p class="text-surface-500 dark:text-surface-400 text-sm">
+                {{ 'examinations.empty' | translate }}
+              </p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</section>

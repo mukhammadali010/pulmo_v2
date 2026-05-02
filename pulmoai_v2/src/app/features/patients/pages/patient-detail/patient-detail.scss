@@ -1,0 +1,23 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+:host ::ng-deep .patient-tabs {
+  display: flex !important;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+
+  > .p-tablist {
+    flex-shrink: 0;
+  }
+
+  > .p-tabpanels {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+}

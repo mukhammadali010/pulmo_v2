@@ -1,0 +1,52 @@
+@if (sorted().length === 0) {
+  <div
+    class="border-surface-200 bg-surface-0 dark:border-surface-700 dark:bg-surface-900 flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed p-12 text-center"
+  >
+    <i class="pi pi-history text-surface-300 dark:text-surface-600 text-4xl"></i>
+    <p class="text-surface-500 dark:text-surface-300 text-sm">
+      {{ 'examinations.empty' | translate }}
+    </p>
+  </div>
+} @else {
+  <ol
+    class="border-surface-200 dark:border-surface-700 relative ml-3 flex flex-col gap-6 border-l-2 pl-6"
+  >
+    @for (exam of sorted(); track exam.id) {
+      <li class="relative">
+        <span
+          class="bg-primary-500 ring-surface-50 dark:ring-surface-950 absolute -left-[34px] flex h-7 w-7 items-center justify-center rounded-full text-white shadow-md ring-4"
+        >
+          <i class="pi {{ iconFor(exam.type) }} text-xs"></i>
+        </span>
+
+        <article
+          class="border-surface-200 bg-surface-0 dark:border-surface-700 dark:bg-surface-900 flex flex-col gap-2 rounded-2xl border p-5 shadow-sm"
+        >
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+              <span class="text-sm font-semibold">
+                {{ typeLabelKey(exam.type) | translate }}
+              </span>
+              <app-status-badge [status]="exam.status" />
+            </div>
+            <span class="text-surface-500 dark:text-surface-300 text-xs">
+              {{ exam.createdAt | date: 'medium' }}
+            </span>
+          </div>
+
+          @if (exam.notes) {
+            <p class="text-surface-700 dark:text-surface-200 text-sm">{{ exam.notes }}</p>
+          }
+
+          @if (exam.aiSummary || exam.aiReport) {
+            <app-ai-report-card [examination]="exam" />
+          } @else if (exam.status === 'pending') {
+            <p class="text-surface-400 text-xs italic">
+              {{ 'examinations.notDiagnosed' | translate }}
+            </p>
+          }
+        </article>
+      </li>
+    }
+  </ol>
+}
