@@ -1,0 +1,4 @@
+# Pin Python version explicitly. Without this, Nixpacks may pick a Python
+# different from the one in pyproject.toml (`requires-python = ">=3.11"`).
+[phases.setup]
+nixPkgs = ["python311", "gcc"]

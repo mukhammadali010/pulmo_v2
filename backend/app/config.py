@@ -1,7 +1,7 @@
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -13,6 +13,21 @@ class Settings(BaseSettings):
     database_url: str = Field(
         default="postgresql+asyncpg://pulmoai:pulmoai@localhost:5432/pulmoai_dev"
     )
+
+    @field_validator("database_url", mode="after")
+    @classmethod
+    def _coerce_async_driver(cls, value: str) -> str:
+        # Managed providers (Railway, Heroku, Render) typically expose
+        # `postgresql://` and `postgres://` URLs. SQLAlchemy with asyncpg
+        # needs an explicit driver — coerce so the user can paste the URL
+        # as-is from the provider's dashboard.
+        if value.startswith("postgresql+asyncpg://"):
+            return value
+        if value.startswith("postgresql://"):
+            return "postgresql+asyncpg://" + value[len("postgresql://") :]
+        if value.startswith("postgres://"):
+            return "postgresql+asyncpg://" + value[len("postgres://") :]
+        return value
 
     jwt_secret: str = Field(default="change-me")
     jwt_algorithm: str = "HS256"
