@@ -2,7 +2,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, status
 
-from app.api.deps import CurrentUser, SessionDep
+from app.api.deps import CurrentAdmin, CurrentUser, SessionDep
 from app.core.security import create_access_token, create_refresh_token, decode_token
 from app.schemas.auth import (
     AuthResponse,
@@ -24,7 +24,10 @@ router = APIRouter()
 
 
 @router.post("/register", response_model=AuthResponse, status_code=status.HTTP_201_CREATED)
-async def register(payload: RegisterRequest, session: SessionDep) -> AuthResponse:
+async def register(
+    payload: RegisterRequest, session: SessionDep, _admin: CurrentAdmin
+) -> AuthResponse:
+    """Public registration is disabled — only admins can provision new doctor accounts."""
     try:
         user = await register_user(session, payload)
     except AuthError as e:

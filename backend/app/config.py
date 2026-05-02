@@ -28,6 +28,12 @@ class Settings(BaseSettings):
     gemini_model: str = "gemini-2.5-flash"
     google_api_key: str | None = None
 
+    # On first startup, if no admin exists in the DB, an admin is provisioned from
+    # these settings. Subsequent startups skip the bootstrap.
+    initial_admin_email: str | None = None
+    initial_admin_password: str | None = None
+    initial_admin_name: str = "Administrator"
+
     @property
     def cors_origins_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]

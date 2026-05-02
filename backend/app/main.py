@@ -5,10 +5,12 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1 import api_router
 from app.config import get_settings
+from app.services.bootstrap import ensure_initial_admin
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    await ensure_initial_admin()
     yield
 
 

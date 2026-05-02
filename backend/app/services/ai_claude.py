@@ -14,7 +14,7 @@ from app.db.session import AsyncSessionLocal
 from app.models.examination import Examination, ExaminationStatus, ExaminationType
 from app.services.ai_common import (
     DIAGNOSIS_JSON_SCHEMA,
-    SYSTEM_PROMPT_AUDIO,
+    SYSTEM_PROMPT_AUDIO_TEXT_ONLY,
     SYSTEM_PROMPT_IMAGE,
     SYSTEM_PROMPT_PARAMS,
     DiagnosisOutput,
@@ -199,7 +199,7 @@ async def _analyze_audio(
         system=[
             {
                 "type": "text",
-                "text": SYSTEM_PROMPT_AUDIO,
+                "text": SYSTEM_PROMPT_AUDIO_TEXT_ONLY,
                 "cache_control": {"type": "ephemeral"},
             }
         ],

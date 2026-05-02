@@ -33,6 +33,22 @@ MAX_TOKENS = 4096
 
 GEMINI_IMAGE_MIMES = {"image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"}
 
+# Gemini supports these audio MIME types directly. For our stored variants
+# (e.g. audio/x-wav, audio/x-m4a), we normalize to a canonical form before sending.
+GEMINI_AUDIO_MIME_MAP = {
+    "audio/wav": "audio/wav",
+    "audio/x-wav": "audio/wav",
+    "audio/mpeg": "audio/mp3",
+    "audio/mp3": "audio/mp3",
+    "audio/ogg": "audio/ogg",
+    "audio/aac": "audio/aac",
+    "audio/flac": "audio/flac",
+    "audio/aiff": "audio/aiff",
+    "audio/mp4": "audio/aac",
+    "audio/m4a": "audio/aac",
+    "audio/x-m4a": "audio/aac",
+}
+
 
 async def analyze_examination(examination_id: UUID, language: str = "uz") -> None:
     settings = get_settings()
@@ -143,17 +159,36 @@ async def _analyze_parameters(
 async def _analyze_audio(
     client: genai.Client, model: str, examination: Examination, language: str
 ) -> DiagnosisOutput:
+    if not examination.attachment_filename or not examination.attachment_mime:
+        raise ValueError("Audio examination has no attachment")
+
+    gemini_mime = GEMINI_AUDIO_MIME_MAP.get(examination.attachment_mime)
+    if gemini_mime is None:
+        raise ValueError(
+            f"Audio MIME type {examination.attachment_mime} is not supported by Gemini"
+        )
+
+    audio_path = examination_file_path(examination.attachment_filename)
+    if audio_path is None:
+        raise ValueError("Audio file not found on disk")
+
+    audio_part = genai_types.Part.from_bytes(
+        data=audio_path.read_bytes(), mime_type=gemini_mime
+    )
+
     user_text = (
         f"{patient_context(examination.patient)}\n\n"
-        f"Physician's description of the recording: "
-        f"{examination.notes or '(no description provided)'}\n\n"
+        f"Physician's notes (supplementary context, may be empty): "
+        f"{examination.notes or '(none provided)'}\n\n"
+        f"Listen to the attached respiratory audio recording and analyze the "
+        f"acoustic findings directly.\n\n"
         f"{language_instruction(language)}"
     )
 
     response = await client.aio.models.generate_content(
         model=model,
-        contents=user_text,
-        config=_json_config(SYSTEM_PROMPT_AUDIO, MAX_TOKENS // 2),
+        contents=[audio_part, user_text],
+        config=_json_config(SYSTEM_PROMPT_AUDIO, MAX_TOKENS),
     )
 
     return _parse_output(response)
