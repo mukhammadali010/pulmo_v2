@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiBaseUrl: 'https://api.pulmoai.example.com/api/v1',
+  apiBaseUrl: 'pulmov2-production.up.railway.app/api/v1',
 };
