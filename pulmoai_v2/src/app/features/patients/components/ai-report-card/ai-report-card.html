@@ -62,35 +62,35 @@
 >
   <div
     [id]="'ai-report-pdf-' + examination().id"
-    class="text-surface-900 flex flex-col gap-4 bg-white p-6"
+    class="text-surface-900 dark:text-surface-100 bg-surface-0 dark:bg-surface-900 flex flex-col gap-4 p-6"
   >
-    <header class="border-surface-200 flex flex-col gap-1 border-b pb-4">
+    <header class="border-surface-200 dark:border-surface-700 flex flex-col gap-1 border-b pb-4">
       <h2 class="text-xl font-semibold">{{ 'examinations.detailedReport' | translate }}</h2>
       @if (patient(); as p) {
-        <p class="text-surface-600 text-sm">{{ p.fullName }}</p>
+        <p class="text-surface-600 dark:text-surface-300 text-sm">{{ p.fullName }}</p>
       }
-      <p class="text-surface-500 text-xs">
+      <p class="text-surface-500 dark:text-surface-400 text-xs">
         {{ 'examType.' + examination().type | translate }} ·
         {{ examination().createdAt | date: 'medium' }}
       </p>
     </header>
 
     @if (examination().aiSummary) {
-      <section class="bg-primary-50 rounded-lg p-3 text-sm">
-        <div class="text-primary-700 mb-1 text-xs font-semibold uppercase">
+      <section class="bg-primary-50 dark:bg-primary-950/40 rounded-lg p-3 text-sm">
+        <div class="text-primary-700 dark:text-primary-300 mb-1 text-xs font-semibold uppercase">
           {{ 'examinations.summaryLabel' | translate }}
         </div>
-        <markdown class="prose prose-sm max-w-none" [data]="examination().aiSummary" />
+        <markdown class="prose prose-sm dark:prose-invert max-w-none" [data]="examination().aiSummary" />
       </section>
     }
 
     @if (examination().aiReport) {
       <section>
-        <markdown class="prose max-w-none" [data]="examination().aiReport" />
+        <markdown class="prose dark:prose-invert max-w-none" [data]="examination().aiReport" />
       </section>
     }
 
-    <footer class="border-surface-200 text-surface-500 mt-4 border-t pt-3 text-xs">
+    <footer class="border-surface-200 dark:border-surface-700 text-surface-500 dark:text-surface-400 mt-4 border-t pt-3 text-xs">
       {{ 'examinations.disclaimer' | translate }}
     </footer>
   </div>

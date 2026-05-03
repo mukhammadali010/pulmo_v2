@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { DatePipe, formatDate } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -12,6 +12,8 @@ import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { TableModule } from 'primeng/table';
 import { TextareaModule } from 'primeng/textarea';
+import { DatePickerModule } from 'primeng/datepicker';
+
 
 import type { Gender, Patient } from '@core/models';
 import { PatientService } from '@core/services/patient.service';
@@ -31,6 +33,8 @@ import { PatientService } from '@core/services/patient.service';
     SelectModule,
     TableModule,
     TextareaModule,
+    DatePickerModule,
+    
   ],
   templateUrl: './patient-list.html',
   styleUrl: './patient-list.scss',
@@ -47,6 +51,8 @@ export class PatientList implements OnInit {
   protected readonly dialogVisible = signal(false);
   protected readonly submitting = signal(false);
   protected readonly searchTerm = signal('');
+
+  //  date2: Date | undefined;
 
   protected readonly filteredPatients = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();
@@ -71,6 +77,7 @@ export class PatientList implements OnInit {
     notes: [''],
   });
 
+ 
   ngOnInit(): void {
     this.patientService.load().subscribe();
   }
@@ -118,16 +125,15 @@ export class PatientList implements OnInit {
       this.form.markAllAsTouched();
       return;
     }
+
     this.submitting.set(true);
     const raw = this.form.getRawValue();
+    const payload = {
+      ...raw,
+      dateOfBirth:raw.dateOfBirth? formatDate(raw.dateOfBirth, 'yyyy-MM-dd','en-US'):null
+    }
     this.patientService
-      .create({
-        fullName: raw.fullName,
-        dateOfBirth: raw.dateOfBirth || null,
-        gender: raw.gender || null,
-        phone: raw.phone || null,
-        notes: raw.notes || null,
-      })
+      .create(payload)
       .subscribe({
         next: () => {
           this.submitting.set(false);

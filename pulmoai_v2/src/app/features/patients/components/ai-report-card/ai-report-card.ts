@@ -74,11 +74,23 @@ export class AiReportCardComponent {
         return;
       }
 
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#ffffff',
-      });
+      // Temporarily disable dark mode on the live document so the captured
+      // pixels are dark-on-white (readable on printed paper). Restored in
+      // the `finally` block so the user's theme preference is preserved.
+      const html = document.documentElement;
+      const wasDark = html.classList.contains('app-dark');
+      if (wasDark) html.classList.remove('app-dark');
+
+      let canvas: HTMLCanvasElement;
+      try {
+        canvas = await html2canvas(element, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: '#ffffff',
+        });
+      } finally {
+        if (wasDark) html.classList.add('app-dark');
+      }
 
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
       const pageWidth = pdf.internal.pageSize.getWidth();

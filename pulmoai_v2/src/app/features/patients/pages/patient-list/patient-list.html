@@ -154,7 +154,7 @@
     <div class="grid grid-cols-2 gap-4">
       <label class="flex flex-col gap-1">
         <span class="text-sm font-medium">{{ 'patients.dateOfBirth' | translate }}</span>
-        <input pInputText type="date" formControlName="dateOfBirth" />
+       <p-datepicker [iconDisplay]="'input'" [showIcon]="true" inputId="icondisplay" formControlName="dateOfBirth" appendTo="body" />
       </label>
       <div class="flex flex-col gap-1">
         <label for="gender" class="text-sm font-medium">
