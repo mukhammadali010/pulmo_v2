@@ -201,5 +201,53 @@
     "xray": "Rentgen",
     "ct": "CT",
     "mri": "MRI"
+  },
+  "finalDiagnosis": {
+    "title": "Yakuniy xulosa",
+    "subtitle": "Tasvir, audio va parametrlar tahlilini bitta xulosaga birlashtirish",
+    "create": "Yakuniy xulosa qilish",
+    "createDescription": "Bemorning tugagan tahlillaridan kamida 2 tasini tanlang (eng yaxshisi turli xil — tasvir + audio + parametrlar).",
+    "selectExaminations": "Tahlillarni tanlang",
+    "noEligible": "Hali tugagan tahlillar yo'q. Avval tahlilni yakunlang.",
+    "minSelected": "Kamida 1 ta tanlang",
+    "maxSelected": "Eng ko'pi 5 ta",
+    "selected": "tanlangan",
+    "clinicalContext": "Klinik kontekst",
+    "clinicalContextHint": "Ixtiyoriy. Anamnez, simptomlar, hayot tarzi (masalan: uzoq vaqtdan beri chekuvchi).",
+    "language": "Hisobot tili",
+    "submit": "Yakuniy xulosa qil",
+    "cancel": "Bekor qilish",
+    "primaryDiagnosis": "Asosiy diagnoz",
+    "differential": "Differential",
+    "modalityConsensus": "Modallikalar konsensusi",
+    "recommendedSteps": "Tavsiya etilgan qadamlar",
+    "limitations": "Cheklovlar",
+    "confidence": {
+      "label": "Ishonch",
+      "low": "Past",
+      "moderate": "O'rta",
+      "high": "Yuqori"
+    },
+    "urgency": {
+      "label": "Shoshilinchlik",
+      "green": "Rejali",
+      "yellow": "Tezkor (kunlar ichida)",
+      "red": "Shoshilinch (zudlik bilan)"
+    },
+    "verdict": {
+      "support": "Qo'llab-quvvatlaydi",
+      "contradict": "Ziddiyatda",
+      "silent": "Ma'lumot yo'q"
+    },
+    "modality": {
+      "image": "Tasvir",
+      "audio": "Audio",
+      "parameters": "Parametrlar"
+    },
+    "sources": "Manba tahlillari",
+    "saved": "Yakuniy xulosa saqlandi",
+    "deleted": "Yakuniy xulosa o'chirildi",
+    "analyzing": "Tahlil qilinmoqda...",
+    "failed": "Tahlilda xato yuz berdi"
   }
 }

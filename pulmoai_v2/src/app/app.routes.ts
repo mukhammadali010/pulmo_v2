@@ -33,6 +33,13 @@ export const routes: Routes = [
           import('@features/examinations/examinations.routes').then((m) => m.EXAMINATIONS_ROUTES),
       },
       {
+        path: 'final-diagnoses',
+        loadChildren: () =>
+          import('@features/final-diagnoses/final-diagnoses.routes').then(
+            (m) => m.FINAL_DIAGNOSES_ROUTES,
+          ),
+      },
+      {
         path: 'admin',
         canMatch: [adminGuard],
         loadChildren: () =>

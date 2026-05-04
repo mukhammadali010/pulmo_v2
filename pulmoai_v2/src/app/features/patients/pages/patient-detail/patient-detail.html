@@ -14,7 +14,7 @@
       </a>
 
       <header
-        class="border-surface-200 bg-surface-0 dark:border-surface-700 dark:bg-surface-900 flex items-center gap-4 rounded-2xl border p-4 shadow-sm"
+        class="border-surface-200 bg-surface-0 dark:border-surface-700 dark:bg-surface-900 flex flex-wrap items-center gap-4 rounded-2xl border p-4 shadow-sm"
       >
       <div
         class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 via-cyan-500 to-teal-500 text-lg font-semibold text-white shadow-md shadow-sky-500/20"
@@ -65,6 +65,16 @@
           }
         </div>
       </div>
+
+      <p-button
+        [routerLink]="['/final-diagnoses', 'new']"
+        [queryParams]="{ patientId: p.id }"
+        [label]="'finalDiagnosis.create' | translate"
+        icon="pi pi-sparkles"
+        severity="secondary"
+        [outlined]="true"
+        size="small"
+      />
     </header>
     </div>
 

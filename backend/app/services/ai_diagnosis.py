@@ -12,7 +12,7 @@ import logging
 from uuid import UUID
 
 from app.config import get_settings
-from app.services.ai_common import mark_failed
+from app.services.ai_common import mark_failed, mark_final_failed
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +36,30 @@ async def analyze_examination(examination_id: UUID, language: str = "uz") -> Non
         )
         logger.error(message)
         await mark_failed(examination_id, message)
+
+
+async def analyze_final_diagnosis(
+    final_diagnosis_id: UUID, language: str = "uz"
+) -> None:
+    """MVP: synthesis is Gemini-only. Claude support can be added later.
+
+    Synthesis consumes the per-examination Markdown reports (already produced),
+    so it works even when the per-examination provider was Claude — but it
+    requires GOOGLE_API_KEY for the synthesis step itself.
+    """
+    settings = get_settings()
+    if not settings.google_api_key:
+        message = (
+            "Final-diagnosis synthesis requires GOOGLE_API_KEY (Gemini). "
+            "Get a free key at https://aistudio.google.com/app/apikey."
+        )
+        logger.error(message)
+        await mark_final_failed(final_diagnosis_id, message)
+        return
+
+    from app.services import ai_final_diagnosis
+
+    await ai_final_diagnosis.analyze_final_diagnosis(final_diagnosis_id, language)
 
 
 def _resolve_provider(

@@ -201,5 +201,53 @@
     "xray": "X-ray",
     "ct": "CT",
     "mri": "MRI"
+  },
+  "finalDiagnosis": {
+    "title": "Final diagnosis",
+    "subtitle": "Combine image, audio, and parameter analyses into one conclusion",
+    "create": "New final diagnosis",
+    "createDescription": "Select at least 2 of the patient's completed analyses (ideally one of each modality — image + audio + parameters).",
+    "selectExaminations": "Select analyses",
+    "noEligible": "No completed analyses yet. Finish at least one analysis first.",
+    "minSelected": "Select at least 1",
+    "maxSelected": "Maximum 5",
+    "selected": "selected",
+    "clinicalContext": "Clinical context",
+    "clinicalContextHint": "Optional. History, symptoms, lifestyle (e.g., long-term smoker).",
+    "language": "Report language",
+    "submit": "Synthesize",
+    "cancel": "Cancel",
+    "primaryDiagnosis": "Primary diagnosis",
+    "differential": "Differential",
+    "modalityConsensus": "Modality consensus",
+    "recommendedSteps": "Recommended next steps",
+    "limitations": "Limitations",
+    "confidence": {
+      "label": "Confidence",
+      "low": "Low",
+      "moderate": "Moderate",
+      "high": "High"
+    },
+    "urgency": {
+      "label": "Urgency",
+      "green": "Routine",
+      "yellow": "Expedited (within days)",
+      "red": "Urgent (same-day)"
+    },
+    "verdict": {
+      "support": "Supports",
+      "contradict": "Contradicts",
+      "silent": "Not assessed"
+    },
+    "modality": {
+      "image": "Image",
+      "audio": "Audio",
+      "parameters": "Parameters"
+    },
+    "sources": "Source analyses",
+    "saved": "Final diagnosis saved",
+    "deleted": "Final diagnosis deleted",
+    "analyzing": "Synthesizing...",
+    "failed": "Synthesis failed"
   }
 }

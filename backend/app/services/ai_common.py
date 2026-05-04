@@ -7,15 +7,17 @@ and DB plumbing are not duplicated.
 from __future__ import annotations
 
 import logging
+from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.db.session import AsyncSessionLocal
 from app.models.examination import Examination, ExaminationStatus
+from app.models.final_diagnosis import FinalDiagnosis
 from app.models.patient import Patient
 
 logger = logging.getLogger(__name__)
@@ -26,6 +28,67 @@ class DiagnosisOutput(BaseModel):
 
     summary: str
     report: str
+
+
+# ---- Final (multi-modal synthesis) AI output schema ----
+
+ConfidenceLevel = Literal["low", "moderate", "high"]
+UrgencyLevel = Literal["green", "yellow", "red"]
+ModalityVerdict = Literal["support", "contradict", "silent"]
+ModalityName = Literal["image", "audio", "parameters"]
+
+
+class DifferentialItem(BaseModel):
+    rank: int = Field(description="1 = most likely. Lower rank = higher likelihood.")
+    diagnosis: str
+    probability: ConfidenceLevel
+    supports: list[ModalityName] = Field(
+        default_factory=list,
+        description="Modalities whose findings support this diagnosis.",
+    )
+    contradicts: list[ModalityName] = Field(
+        default_factory=list,
+        description="Modalities whose findings contradict this diagnosis.",
+    )
+
+
+class ModalityConsensus(BaseModel):
+    verdict: ModalityVerdict
+    note: str = Field(description="One-sentence rationale for the verdict.")
+
+
+class ModalityConsensusMap(BaseModel):
+    """Per-modality verdict. A modality omitted from the input set should be 'silent'."""
+
+    image: ModalityConsensus
+    audio: ModalityConsensus
+    parameters: ModalityConsensus
+
+
+class FinalDiagnosisOutput(BaseModel):
+    """Structured AI response for the unified multi-modal diagnosis."""
+
+    summary: str = Field(
+        description="2–3 sentence brief: top diagnosis, confidence, urgency, key next step."
+    )
+    primary_diagnosis: str
+    icd10: str | None = Field(default=None, description="ICD-10 code if confidently inferable.")
+    confidence: ConfidenceLevel
+    urgency: UrgencyLevel
+    differential: list[DifferentialItem] = Field(
+        description="Ranked differential, 1–4 items, top first.",
+    )
+    modality_consensus: ModalityConsensusMap
+    recommended_next_steps: list[str] = Field(
+        description="Concrete next actions, ordered by priority.",
+    )
+    limitations: list[str] = Field(
+        default_factory=list,
+        description="What the synthesis cannot resolve and what was not collected.",
+    )
+    report_markdown: str = Field(
+        description="Full Markdown report with the section headers specified in the system prompt.",
+    )
 
 
 # JSON schema for providers that take dict-shaped schemas.
@@ -164,6 +227,55 @@ Be honest about uncertainty. If you cannot identify a specific finding with \
 confidence, say so rather than inventing details.""" + JSON_OUTPUT_INSTRUCTION
 
 
+SYSTEM_PROMPT_FINAL_DIAGNOSIS = """You are a senior pulmonology consultant performing multi-modal SYNTHESIS. \
+You receive N independent AI analyses (some combination of imaging, audio, and pulmonary \
+parameters) for ONE patient and must produce ONE unified clinical conclusion.
+
+CRITICAL RULES:
+- Synthesize, do NOT re-diagnose. You do NOT have access to the raw images/audio/raw values. \
+  You only have the prior AI reports. Do not invent findings that are not in those reports.
+- Cite which modality supports each claim using bracket tags, e.g. \
+  "consolidation [image]; coarse crackles [audio]; mild restrictive pattern [parameters]".
+- If modalities CONFLICT on a finding, name the conflict explicitly and state which signal \
+  is more reliable for the candidate diagnosis and why.
+- If a modality was NOT provided for this patient, mark it "silent" in modality_consensus \
+  and do not penalize confidence for its absence — but reflect the gap in `limitations`.
+- Confidence reflects how strongly the COMBINED evidence supports your top diagnosis: \
+  `low` = single weak signal, `moderate` = one strong or two concordant signals, \
+  `high` = concordant signal in two or more modalities with no significant contradiction.
+- Urgency: `green` (routine follow-up), `yellow` (expedited evaluation within days), \
+  `red` (urgent — same-day or ED). Err on the side of higher urgency when any modality \
+  flags an acute or life-threatening finding.
+- The differential must be ranked 1..N (1 = most likely). Include 1–4 items.
+- ICD-10 only if confidently inferable from the synthesized picture; otherwise null.
+
+Structure the `report_markdown` field as Markdown with these sections:
+
+## Final diagnosis
+One line: the primary diagnosis.
+
+## Differential
+Ranked list (1–4). For each item, list the supporting and contradicting modalities.
+
+## Modality consensus
+For image, audio, and parameters: state support / contradict / silent + one sentence why.
+
+## Confidence and rationale
+Low / moderate / high + the reasoning that justifies that level.
+
+## Urgency
+Green / yellow / red + the reasoning.
+
+## Recommended next steps
+Concrete next actions, ordered by priority.
+
+## Limitations
+What synthesis cannot resolve and what was not collected.
+
+The `summary` field is a 2–3 sentence brief: top diagnosis, confidence, urgency, and key \
+next step. Plain text, no Markdown headers in the summary.""" + JSON_OUTPUT_INSTRUCTION
+
+
 SYSTEM_PROMPT_AUDIO_TEXT_ONLY = """You are a clinical decision-support assistant for pulmonologists. \
 You are reviewing a respiratory audio recording (lung sounds, cough, breathing) that \
 was uploaded by the physician.
@@ -249,4 +361,27 @@ async def mark_failed(examination_id: UUID, message: str) -> None:
         if examination is not None:
             examination.status = ExaminationStatus.FAILED
             examination.ai_report = message[:2000]
+            await session.commit()
+
+
+async def load_final_diagnosis(
+    session: AsyncSession, final_diagnosis_id: UUID
+) -> FinalDiagnosis | None:
+    result = await session.execute(
+        select(FinalDiagnosis)
+        .options(
+            selectinload(FinalDiagnosis.patient),
+            selectinload(FinalDiagnosis.examinations),
+        )
+        .where(FinalDiagnosis.id == final_diagnosis_id)
+    )
+    return result.scalar_one_or_none()
+
+
+async def mark_final_failed(final_diagnosis_id: UUID, message: str) -> None:
+    async with AsyncSessionLocal() as session:
+        final = await session.get(FinalDiagnosis, final_diagnosis_id)
+        if final is not None:
+            final.status = ExaminationStatus.FAILED
+            final.error_message = message[:2000]
             await session.commit()

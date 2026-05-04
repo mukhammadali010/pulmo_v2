@@ -10,7 +10,7 @@ from app.config import get_settings
 from app.db.base import Base
 
 # Import models so Base.metadata is populated.
-from app.models import examination, patient, user  # noqa: F401
+from app.models import examination, final_diagnosis, patient, user  # noqa: F401
 
 config = context.config
 config.set_main_option("sqlalchemy.url", get_settings().database_url)
