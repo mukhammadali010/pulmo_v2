@@ -5,13 +5,16 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { forkJoin } from 'rxjs';
 
 import type {
+  AffectedRegion,
   Examination,
+  FinalDiagnosis,
   FinalDiagnosisListItem,
   Patient,
 } from '@core/models';
 import { ExaminationService } from '@core/services/examination.service';
 import { FinalDiagnosisService } from '@core/services/final-diagnosis.service';
 import { PatientService } from '@core/services/patient.service';
+import { LungDiagram } from '../../../final-diagnoses/components/lung-diagram/lung-diagram';
 
 type Urgency = 'green' | 'yellow' | 'red';
 type TrendDirection = 'improving' | 'worsening' | 'stable' | 'unknown';
@@ -68,7 +71,7 @@ const PARAM_PAD_Y = 12;
 
 @Component({
   selector: 'app-patient-trend',
-  imports: [DatePipe, DecimalPipe, LowerCasePipe, RouterLink, TranslatePipe],
+  imports: [DatePipe, DecimalPipe, LowerCasePipe, RouterLink, TranslatePipe, LungDiagram],
   templateUrl: './patient-trend.html',
   styleUrl: './patient-trend.scss',
 })
@@ -82,9 +85,15 @@ export class PatientTrend implements OnInit {
 
   protected readonly patient = signal<Patient | null>(null);
   protected readonly loading = signal(true);
+  protected readonly latestFinalDiagnosis = signal<FinalDiagnosis | null>(null);
 
   protected readonly finalDiagnoses = this.finalDiagnosisService.items;
   protected readonly examinations = this.examinationService.examinations;
+
+  /** Affected regions from the most recent done final diagnosis (empty if none/old). */
+  protected readonly latestAffectedRegions = computed<AffectedRegion[]>(() =>
+    this.latestFinalDiagnosis()?.aiPayload?.affected_regions ?? [],
+  );
 
   protected readonly initials = computed(() => {
     const name = this.patient()?.fullName?.trim() ?? '';
@@ -212,11 +221,26 @@ export class PatientTrend implements OnInit {
       next: ({ patient }) => {
         this.patient.set(patient);
         this.loading.set(false);
+        this.fetchLatestFinalDiagnosisDetail();
       },
       error: () => {
         this.loading.set(false);
         void this.router.navigate(['/patients']);
       },
+    });
+  }
+
+  /** The list endpoint returns compact rows without `aiPayload`. To render
+   * the lung diagram we need the full payload of the most recent done FD,
+   * so fetch it once after the list has loaded. */
+  private fetchLatestFinalDiagnosisDetail(): void {
+    const latestDone = this.finalDiagnoses()
+      .filter((f) => f.status === 'done')
+      .slice()
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
+    if (!latestDone) return;
+    this.finalDiagnosisService.getById(latestDone.id).subscribe({
+      next: (full) => this.latestFinalDiagnosis.set(full),
     });
   }
 

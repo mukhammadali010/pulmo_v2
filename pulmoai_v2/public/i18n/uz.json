@@ -249,6 +249,8 @@
       "subtitle": "Modalliklar bo'yicha lokalizatsiya",
       "noRegions": "Tahlil bu yakuniy xulosada lokalizatsiyani aniqlay olmadi.",
       "otherFindings": "Boshqa topilmalar",
+      "rotateHint": "Sichqoncha bilan aylantiring",
+      "loading": "3D model yuklanmoqda...",
       "severity": {
         "mild": "Yengil",
         "moderate": "O'rtacha",

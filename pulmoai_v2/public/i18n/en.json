@@ -249,6 +249,8 @@
       "subtitle": "Localization across modalities",
       "noRegions": "The synthesis could not localize the disease in this final diagnosis.",
       "otherFindings": "Other findings",
+      "rotateHint": "Drag to rotate",
+      "loading": "Loading 3D model...",
       "severity": {
         "mild": "Mild",
         "moderate": "Moderate",

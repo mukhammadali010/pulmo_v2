@@ -39,6 +39,7 @@
     "@tailwindcss/postcss": "^4.2.4",
     "@types/file-saver": "^2.0.7",
     "@types/leaflet": "^1.9.21",
+    "@types/three": "^0.184.0",
     "dayjs": "^1.11.20",
     "file-saver": "^2.0.5",
     "html2canvas-pro": "^2.0.2",
@@ -54,6 +55,7 @@
     "qrcode": "^1.5.4",
     "rxjs": "~7.8.0",
     "tailwindcss": "^4.2.4",
+    "three": "^0.184.0",
     "tslib": "^2.3.0"
   },
   "devDependencies": {
