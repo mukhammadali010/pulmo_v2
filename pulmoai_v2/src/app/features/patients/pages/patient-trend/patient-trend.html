@@ -1,0 +1,369 @@
+@if (loading()) {
+  <div class="flex h-64 items-center justify-center">
+    <i class="pi pi-spin pi-spinner text-primary-500 text-3xl"></i>
+  </div>
+} @else if (patient(); as p) {
+  <section class="flex h-full flex-col gap-6 overflow-y-auto p-6">
+    <!-- Back link + page header -->
+    <div class="flex flex-col gap-3">
+      <a
+        [routerLink]="['/patients', p.id]"
+        class="text-surface-500 hover:text-primary-500 inline-flex w-fit items-center gap-1.5 text-sm"
+      >
+        <i class="pi pi-arrow-left text-xs"></i>
+        {{ p.fullName }}
+      </a>
+
+      <header class="flex flex-col gap-1">
+        <div class="flex items-center gap-2">
+          <span
+            class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-cyan-500 text-white shadow-md shadow-sky-500/20"
+          >
+            <i class="pi pi-chart-line"></i>
+          </span>
+          <h1 class="text-surface-900 dark:text-surface-50 text-2xl font-bold tracking-tight">
+            {{ 'trend.title' | translate }}
+          </h1>
+        </div>
+        <p class="text-surface-500 dark:text-surface-400 text-sm">
+          {{ 'trend.subtitle' | translate }}
+        </p>
+      </header>
+    </div>
+
+    @if (severityPoints().length === 0) {
+      <div
+        class="border-surface-200 dark:border-surface-700 flex flex-col items-center gap-3 rounded-2xl border border-dashed p-12 text-center"
+      >
+        <i class="pi pi-chart-line text-surface-400 text-4xl"></i>
+        <p class="text-surface-500 dark:text-surface-400 max-w-md text-sm">
+          {{ 'trend.noData' | translate }}
+        </p>
+      </div>
+    } @else {
+      <div class="flex flex-col gap-5 max-w-6xl">
+        <!-- KPI row -->
+        <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <!-- Trend -->
+          <div
+            class="flex flex-col gap-2 rounded-2xl px-4 py-3.5 shadow-sm"
+            [class]="trendBadgeClass()"
+          >
+            <span class="text-[11px] font-medium uppercase tracking-wide opacity-80">
+              {{ 'trend.stat.trend' | translate }}
+            </span>
+            <div class="flex items-center gap-2">
+              <i class="pi text-lg" [class]="trendIcon()"></i>
+              <span class="text-base font-semibold">
+                {{ 'trend.' + trend() | translate }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Total -->
+          <div
+            class="border-surface-200 bg-surface-0 dark:border-surface-700 dark:bg-surface-900 flex flex-col gap-2 rounded-2xl border px-4 py-3.5 shadow-sm"
+          >
+            <span class="text-surface-500 dark:text-surface-400 text-[11px] font-medium uppercase tracking-wide">
+              {{ 'trend.stat.total' | translate }}
+            </span>
+            <div class="flex items-baseline gap-1.5">
+              <span class="text-surface-900 dark:text-surface-50 text-2xl font-bold leading-none">
+                {{ severityPoints().length }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Top urgency -->
+          <div
+            class="border-surface-200 bg-surface-0 dark:border-surface-700 dark:bg-surface-900 flex flex-col gap-2 rounded-2xl border px-4 py-3.5 shadow-sm"
+          >
+            <span class="text-surface-500 dark:text-surface-400 text-[11px] font-medium uppercase tracking-wide">
+              {{ 'trend.stat.topUrgency' | translate }}
+            </span>
+            @if (topUrgency(); as u) {
+              <span
+                class="inline-flex w-fit items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-wide"
+                [class]="urgencyBadgeClass(u)"
+              >
+                <i class="pi pi-bolt text-[10px]"></i>
+                {{ 'finalDiagnosis.urgency.' + u | translate }}
+              </span>
+            }
+          </div>
+
+          <!-- Day span -->
+          <div
+            class="border-surface-200 bg-surface-0 dark:border-surface-700 dark:bg-surface-900 flex flex-col gap-2 rounded-2xl border px-4 py-3.5 shadow-sm"
+          >
+            <span class="text-surface-500 dark:text-surface-400 text-[11px] font-medium uppercase tracking-wide">
+              {{ 'trend.stat.span' | translate }}
+            </span>
+            <div class="flex items-baseline gap-1.5">
+              @if (daySpan() === null) {
+                <span class="text-surface-400 text-base">{{ 'trend.stat.noSpan' | translate }}</span>
+              } @else if (daySpan() === 0) {
+                <span class="text-surface-700 dark:text-surface-200 text-sm font-medium">
+                  {{ 'trend.stat.spanSingle' | translate }}
+                </span>
+              } @else {
+                <span class="text-surface-900 dark:text-surface-50 text-2xl font-bold leading-none">
+                  {{ daySpan() }}
+                </span>
+                <span class="text-surface-500 dark:text-surface-400 text-xs">
+                  {{ 'trend.stat.spanDays' | translate }}
+                </span>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Severity timeline (large chart) -->
+        <section
+          class="border-surface-200 bg-surface-0 dark:border-surface-700 dark:bg-surface-900 flex flex-col gap-4 rounded-2xl border p-5 shadow-sm"
+        >
+          <div class="flex items-center justify-between gap-2">
+            <h2 class="text-surface-900 dark:text-surface-50 text-base font-semibold">
+              {{ 'trend.timeline' | translate }}
+            </h2>
+            @if (latestPoint(); as l) {
+              <span class="text-surface-500 dark:text-surface-400 text-xs">
+                {{ 'trend.latestValue' | translate }}: {{ l.date | date: 'mediumDate' }}
+              </span>
+            }
+          </div>
+
+          <svg
+            [attr.viewBox]="'0 0 ' + timelineW + ' ' + timelineH"
+            class="block w-full"
+            preserveAspectRatio="xMidYMid meet"
+          >
+            <defs>
+              <linearGradient id="severityArea" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stop-color="#ef4444" stop-opacity="0.25" />
+                <stop offset="50%" stop-color="#f59e0b" stop-opacity="0.18" />
+                <stop offset="100%" stop-color="#10b981" stop-opacity="0.12" />
+              </linearGradient>
+            </defs>
+
+            <!-- Severity bands (subtle) -->
+            <rect
+              [attr.x]="timelinePadLeft"
+              [attr.y]="severityY3"
+              [attr.width]="timelineW - timelinePadLeft - timelinePadRight"
+              [attr.height]="severityY2 - severityY3"
+              fill="#ef4444"
+              opacity="0.08"
+            />
+            <rect
+              [attr.x]="timelinePadLeft"
+              [attr.y]="severityY2"
+              [attr.width]="timelineW - timelinePadLeft - timelinePadRight"
+              [attr.height]="severityY1 - severityY2"
+              fill="#f59e0b"
+              opacity="0.08"
+            />
+            <rect
+              [attr.x]="timelinePadLeft"
+              [attr.y]="severityY1"
+              [attr.width]="timelineW - timelinePadLeft - timelinePadRight"
+              [attr.height]="timelineH - timelinePadBottom - severityY1"
+              fill="#10b981"
+              opacity="0.08"
+            />
+
+            <!-- Horizontal grid lines at each severity level -->
+            <line [attr.x1]="timelinePadLeft" [attr.x2]="timelineXEnd" [attr.y1]="severityY1" [attr.y2]="severityY1"
+              stroke="currentColor" stroke-width="1" stroke-dasharray="2 4" class="text-surface-300 dark:text-surface-700" />
+            <line [attr.x1]="timelinePadLeft" [attr.x2]="timelineXEnd" [attr.y1]="severityY2" [attr.y2]="severityY2"
+              stroke="currentColor" stroke-width="1" stroke-dasharray="2 4" class="text-surface-300 dark:text-surface-700" />
+            <line [attr.x1]="timelinePadLeft" [attr.x2]="timelineXEnd" [attr.y1]="severityY3" [attr.y2]="severityY3"
+              stroke="currentColor" stroke-width="1" stroke-dasharray="2 4" class="text-surface-300 dark:text-surface-700" />
+
+            <!-- Y-axis labels (short severity level names) -->
+            <text [attr.x]="timelinePadLeft - 8" [attr.y]="severityY3 + 4" text-anchor="end"
+              class="fill-current text-red-600 dark:text-red-400" font-size="11" font-weight="600">
+              {{ 'trend.severityHigh' | translate }}
+            </text>
+            <text [attr.x]="timelinePadLeft - 8" [attr.y]="severityY2 + 4" text-anchor="end"
+              class="fill-current text-amber-600 dark:text-amber-400" font-size="11" font-weight="600">
+              {{ 'trend.severityMid' | translate }}
+            </text>
+            <text [attr.x]="timelinePadLeft - 8" [attr.y]="severityY1 + 4" text-anchor="end"
+              class="fill-current text-emerald-600 dark:text-emerald-400" font-size="11" font-weight="600">
+              {{ 'trend.severityLow' | translate }}
+            </text>
+
+            <!-- Filled trajectory area -->
+            @if (severityPoints().length > 1) {
+              <path [attr.d]="severityArea()" fill="url(#severityArea)" />
+            }
+
+            <!-- Trajectory line -->
+            @if (severityPoints().length > 1) {
+              <path
+                [attr.d]="severityPath()"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="text-surface-700 dark:text-surface-200"
+              />
+            }
+
+            <!-- Dots with shadow rings -->
+            @for (c of severityCoords(); track $index) {
+              <g>
+                <circle [attr.cx]="c.cx" [attr.cy]="c.cy" r="9" [attr.fill]="c.color" opacity="0.18" />
+                <circle [attr.cx]="c.cx" [attr.cy]="c.cy" r="5.5" [attr.fill]="c.color" stroke="white" stroke-width="2">
+                  <title>{{ c.tooltip }}</title>
+                </circle>
+              </g>
+            }
+
+            <!-- X-axis tick labels -->
+            @for (tick of timelineTicks(); track $index) {
+              <text [attr.x]="tick.x" [attr.y]="timelineH - 10" text-anchor="middle"
+                class="fill-current text-surface-500 dark:text-surface-400" font-size="10">
+                {{ tick.date | date: 'MMM d' }}
+              </text>
+            }
+          </svg>
+        </section>
+
+        <!-- Urgency distribution -->
+        <section
+          class="border-surface-200 bg-surface-0 dark:border-surface-700 dark:bg-surface-900 flex flex-col gap-3 rounded-2xl border p-5 shadow-sm"
+        >
+          <h2 class="text-surface-900 dark:text-surface-50 text-base font-semibold">
+            {{ 'trend.distribution' | translate }}
+          </h2>
+
+          <div class="flex h-3 overflow-hidden rounded-full">
+            @if (urgencyDistribution().red.count > 0) {
+              <div [style.width.%]="urgencyDistribution().red.pct" class="bg-red-500"></div>
+            }
+            @if (urgencyDistribution().yellow.count > 0) {
+              <div [style.width.%]="urgencyDistribution().yellow.pct" class="bg-amber-400"></div>
+            }
+            @if (urgencyDistribution().green.count > 0) {
+              <div [style.width.%]="urgencyDistribution().green.pct" class="bg-emerald-500"></div>
+            }
+          </div>
+
+          <div class="flex flex-wrap gap-4 text-xs">
+            <div class="flex items-center gap-2">
+              <span class="h-2.5 w-2.5 rounded-full bg-red-500"></span>
+              <span class="text-surface-700 dark:text-surface-300 font-medium">
+                {{ 'finalDiagnosis.urgency.red' | translate }}
+              </span>
+              <span class="text-surface-500 dark:text-surface-400">
+                {{ urgencyDistribution().red.count }} ({{ urgencyDistribution().red.pct | number: '1.0-0' }}%)
+              </span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="h-2.5 w-2.5 rounded-full bg-amber-400"></span>
+              <span class="text-surface-700 dark:text-surface-300 font-medium">
+                {{ 'finalDiagnosis.urgency.yellow' | translate }}
+              </span>
+              <span class="text-surface-500 dark:text-surface-400">
+                {{ urgencyDistribution().yellow.count }} ({{ urgencyDistribution().yellow.pct | number: '1.0-0' }}%)
+              </span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
+              <span class="text-surface-700 dark:text-surface-300 font-medium">
+                {{ 'finalDiagnosis.urgency.green' | translate }}
+              </span>
+              <span class="text-surface-500 dark:text-surface-400">
+                {{ urgencyDistribution().green.count }} ({{ urgencyDistribution().green.pct | number: '1.0-0' }}%)
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Parameter trend cards -->
+        @if (parameterSeries().length > 0) {
+          <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            @for (series of parameterSeries(); track series.key) {
+              <section
+                class="border-surface-200 bg-surface-0 dark:border-surface-700 dark:bg-surface-900 flex flex-col gap-3 rounded-2xl border p-5 shadow-sm"
+              >
+                <div class="flex items-center justify-between gap-2">
+                  <h3 class="text-surface-500 dark:text-surface-400 text-xs font-semibold uppercase tracking-wide">
+                    {{ series.labelKey | translate }}
+                  </h3>
+                  <span
+                    class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                    [class]="paramAtNormal(series)
+                      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
+                      : 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300'"
+                  >
+                    @if (paramAtNormal(series)) {
+                      <i class="pi pi-check-circle text-[9px]"></i>
+                    } @else {
+                      <i class="pi pi-exclamation-triangle text-[9px]"></i>
+                    }
+                    {{ 'trend.normalRange' | translate }} ≥ {{ series.normalMin }}{{ series.suffix }}
+                  </span>
+                </div>
+
+                <div class="flex items-baseline gap-2">
+                  <span class="text-surface-900 dark:text-surface-50 text-3xl font-bold leading-none">
+                    {{ paramLatest(series) }}{{ series.suffix }}
+                  </span>
+                  <span class="inline-flex items-center gap-1 text-xs" [class]="paramTrendColor(series)">
+                    <i class="pi text-[10px]" [class]="paramTrendIcon(series)"></i>
+                    @if (paramDelta(series) > 0) { + }{{ paramDelta(series) | number: '1.0-1' }}{{ series.suffix }}
+                  </span>
+                </div>
+
+                <svg
+                  [attr.viewBox]="'0 0 ' + paramW + ' ' + paramH"
+                  class="block h-24 w-full"
+                  preserveAspectRatio="none"
+                  aria-hidden="true"
+                >
+                  <defs>
+                    <linearGradient [attr.id]="'paramArea-' + series.key" x1="0" x2="0" y1="0" y2="1">
+                      <stop offset="0%" stop-color="#0ea5e9" stop-opacity="0.3" />
+                      <stop offset="100%" stop-color="#0ea5e9" stop-opacity="0" />
+                    </linearGradient>
+                  </defs>
+
+                  <line
+                    [attr.x1]="0" [attr.x2]="paramW"
+                    [attr.y1]="paramNormalY(series)" [attr.y2]="paramNormalY(series)"
+                    stroke="currentColor" stroke-width="1" stroke-dasharray="3 3"
+                    class="text-emerald-500 opacity-60"
+                  />
+
+                  <path [attr.d]="paramArea(series)" [attr.fill]="'url(#paramArea-' + series.key + ')'" />
+
+                  <path
+                    [attr.d]="paramPath(series)"
+                    fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round"
+                    class="text-sky-500"
+                  />
+
+                  @for (c of paramCoords(series); track $index) {
+                    <circle [attr.cx]="c.cx" [attr.cy]="c.cy" r="3" fill="currentColor" class="text-sky-500" />
+                  }
+                </svg>
+
+                <div class="text-surface-500 dark:text-surface-400 flex items-center justify-between text-[11px]">
+                  <span>
+                    {{ 'trend.previousValue' | translate }}: <b class="text-surface-700 dark:text-surface-300">{{ paramFirst(series) }}{{ series.suffix }}</b>
+                  </span>
+                  <span>{{ series.points.length }} × {{ 'trend.totalDiagnoses' | translate | lowercase }}</span>
+                </div>
+              </section>
+            }
+          </div>
+        }
+      </div>
+    }
+  </section>
+}

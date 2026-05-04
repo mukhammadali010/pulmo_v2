@@ -249,5 +249,42 @@
     "deleted": "Final diagnosis deleted",
     "analyzing": "Synthesizing...",
     "failed": "Synthesis failed"
+  },
+  "trend": {
+    "title": "Patient health trajectory",
+    "subtitle": "How the patient's status has changed across analyses",
+    "viewTrend": "View trend",
+    "improving": "Improving",
+    "worsening": "Worsening",
+    "stable": "Stable",
+    "unknown": "Not enough data",
+    "unknownHint": "At least 2 final diagnoses are needed to show a trend.",
+    "severityAxis": "Urgency",
+    "severityHigh": "High",
+    "severityMid": "Medium",
+    "severityLow": "Low",
+    "totalDiagnoses": "Final diagnoses",
+    "lastUpdated": "Last analysis",
+    "spo2": "SpO₂",
+    "fev1": "FEV₁",
+    "fev1Fvc": "FEV₁/FVC",
+    "noParameterTrend": "At least 2 measurements are needed for a parameter trend.",
+    "stat": {
+      "trend": "Overall trend",
+      "total": "Total diagnoses",
+      "topUrgency": "Peak urgency",
+      "span": "Observation period",
+      "spanDays": "days",
+      "spanSingle": "Same day",
+      "noSpan": "—"
+    },
+    "distribution": "Urgency distribution",
+    "timeline": "Timeline",
+    "noData": "No final diagnoses for this patient yet. Create the first one and the trajectory will appear here.",
+    "axisDateFormat": "MMM d",
+    "normalRange": "Normal",
+    "previousValue": "Previous",
+    "latestValue": "Latest",
+    "delta": "Change"
   }
 }

@@ -10,4 +10,9 @@ export const PATIENTS_ROUTES: Routes = [
     loadComponent: () =>
       import('./pages/patient-detail/patient-detail').then((m) => m.PatientDetail),
   },
+  {
+    path: ':id/trend',
+    loadComponent: () =>
+      import('./pages/patient-trend/patient-trend').then((m) => m.PatientTrend),
+  },
 ];

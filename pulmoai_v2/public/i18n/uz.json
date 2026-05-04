@@ -249,5 +249,42 @@
     "deleted": "Yakuniy xulosa o'chirildi",
     "analyzing": "Tahlil qilinmoqda...",
     "failed": "Tahlilda xato yuz berdi"
+  },
+  "trend": {
+    "title": "Bemor holati dinamikasi",
+    "subtitle": "Tahlillar bo'yicha holatning o'zgarishi",
+    "viewTrend": "Dinamikani ko'rish",
+    "improving": "Yaxshilanmoqda",
+    "worsening": "Yomonlashmoqda",
+    "stable": "Barqaror",
+    "unknown": "Yetarli ma'lumot yo'q",
+    "unknownHint": "Trend ko'rinishi uchun kamida 2 ta yakuniy xulosa kerak.",
+    "severityAxis": "Shoshilinchlik",
+    "severityHigh": "Yuqori",
+    "severityMid": "O'rta",
+    "severityLow": "Past",
+    "totalDiagnoses": "Yakuniy xulosalar",
+    "lastUpdated": "Oxirgi tahlil",
+    "spo2": "SpO₂",
+    "fev1": "FEV₁",
+    "fev1Fvc": "FEV₁/FVC",
+    "noParameterTrend": "Parametr trendi uchun kamida 2 ta o'lchov kerak.",
+    "stat": {
+      "trend": "Umumiy tendentsiya",
+      "total": "Jami xulosalar",
+      "topUrgency": "Eng yuqori shoshilinchlik",
+      "span": "Kuzatuv davri",
+      "spanDays": "kun",
+      "spanSingle": "Bir kunlik",
+      "noSpan": "—"
+    },
+    "distribution": "Shoshilinchlik taqsimoti",
+    "timeline": "Vaqt jadvali",
+    "noData": "Bu bemor uchun yakuniy xulosa hali yo'q. Birinchi yakuniy xulosani yarating va shu yerda dinamika ko'rinadi.",
+    "axisDateFormat": "MMM d",
+    "normalRange": "Norma",
+    "previousValue": "Oldingi",
+    "latestValue": "Oxirgi",
+    "delta": "O'zgarish"
   }
 }

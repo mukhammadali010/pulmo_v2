@@ -8,6 +8,7 @@ import { forkJoin } from 'rxjs';
 
 import type { Patient } from '@core/models';
 import { ExaminationService } from '@core/services/examination.service';
+import { FinalDiagnosisService } from '@core/services/final-diagnosis.service';
 import { PatientService } from '@core/services/patient.service';
 import { AudioDiagnostic } from '../../components/audio-diagnostic/audio-diagnostic';
 import { ImageDiagnostic } from '../../components/image-diagnostic/image-diagnostic';
@@ -35,6 +36,7 @@ const POLL_INTERVAL_MS = 3000;
 export class PatientDetail implements OnInit, OnDestroy {
   private readonly patientService = inject(PatientService);
   private readonly examinationService = inject(ExaminationService);
+  private readonly finalDiagnosisService = inject(FinalDiagnosisService);
   private readonly router = inject(Router);
 
   /** Bound from the route via withComponentInputBinding. */
@@ -44,6 +46,7 @@ export class PatientDetail implements OnInit, OnDestroy {
   protected readonly loading = signal(true);
 
   protected readonly examinations = this.examinationService.examinations;
+  protected readonly finalDiagnoses = this.finalDiagnosisService.items;
 
   protected readonly audio = computed(() => this.examinations().filter((e) => e.type === 'audio'));
   protected readonly images = computed(() =>
@@ -102,6 +105,7 @@ export class PatientDetail implements OnInit, OnDestroy {
     forkJoin({
       patient: this.patientService.getById(this.id()),
       _exams: this.examinationService.load(this.id()),
+      _finals: this.finalDiagnosisService.load(this.id()),
     }).subscribe({
       next: ({ patient }) => {
         this.patient.set(patient);
@@ -119,5 +123,22 @@ export class PatientDetail implements OnInit, OnDestroy {
       clearInterval(this.pollTimer);
       this.pollTimer = null;
     }
+  }
+
+  protected urgencyClass(urgency: string | null | undefined): string {
+    if (urgency === 'red') return 'bg-red-500 text-white';
+    if (urgency === 'yellow') return 'bg-amber-400 text-amber-950';
+    if (urgency === 'green') return 'bg-emerald-500 text-white';
+    return 'bg-surface-200 text-surface-700';
+  }
+
+  protected confidenceClass(confidence: string | null | undefined): string {
+    if (confidence === 'high')
+      return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300';
+    if (confidence === 'moderate')
+      return 'bg-sky-100 text-sky-700 dark:bg-sky-950 dark:text-sky-300';
+    if (confidence === 'low')
+      return 'bg-surface-100 text-surface-600 dark:bg-surface-800 dark:text-surface-400';
+    return 'bg-surface-100 text-surface-600';
   }
 }
