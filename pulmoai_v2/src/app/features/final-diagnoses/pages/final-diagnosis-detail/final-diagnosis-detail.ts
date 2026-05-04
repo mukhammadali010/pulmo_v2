@@ -22,6 +22,7 @@ import type {
   ModalityVerdict,
 } from '@core/models';
 import { FinalDiagnosisService } from '@core/services/final-diagnosis.service';
+import { LungDiagram } from '../../components/lung-diagram/lung-diagram';
 
 const POLL_INTERVAL_MS = 3000;
 const MODALITY_ORDER: ModalityName[] = ['image', 'audio', 'parameters'];
@@ -34,6 +35,7 @@ const MODALITY_ORDER: ModalityName[] = ['image', 'audio', 'parameters'];
     MarkdownComponent,
     ButtonModule,
     MessageModule,
+    LungDiagram,
   ],
   templateUrl: './final-diagnosis-detail.html',
   styleUrl: './final-diagnosis-detail.scss',

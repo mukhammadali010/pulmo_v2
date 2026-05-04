@@ -36,6 +36,36 @@ ConfidenceLevel = Literal["low", "moderate", "high"]
 UrgencyLevel = Literal["green", "yellow", "red"]
 ModalityVerdict = Literal["support", "contradict", "silent"]
 ModalityName = Literal["image", "audio", "parameters"]
+LobeRegion = Literal[
+    "left_upper",
+    "left_lower",
+    "right_upper",
+    "right_middle",
+    "right_lower",
+    "bilateral",
+    "pleural",
+    "mediastinal",
+    "airways",
+]
+SeverityLevel = Literal["mild", "moderate", "severe"]
+
+
+class AffectedRegion(BaseModel):
+    """One anatomical region implicated by the synthesized findings."""
+
+    region: LobeRegion
+    finding: str = Field(
+        description=(
+            "Short clinical phrase describing what was found in this region "
+            "(e.g., 'consolidation', 'honeycombing', 'ground-glass opacity', "
+            "'effusion', 'atelectasis')."
+        ),
+    )
+    severity: SeverityLevel
+    modalities: list[ModalityName] = Field(
+        default_factory=list,
+        description="Which input modalities supported this localization.",
+    )
 
 
 class DifferentialItem(BaseModel):
@@ -85,6 +115,14 @@ class FinalDiagnosisOutput(BaseModel):
     limitations: list[str] = Field(
         default_factory=list,
         description="What the synthesis cannot resolve and what was not collected.",
+    )
+    affected_regions: list[AffectedRegion] = Field(
+        default_factory=list,
+        description=(
+            "Anatomical lung regions implicated by the synthesized findings, "
+            "drawn from the controlled vocabulary. Empty list if the modalities "
+            "do not localize the disease to a specific region."
+        ),
     )
     report_markdown: str = Field(
         description="Full Markdown report with the section headers specified in the system prompt.",
@@ -248,6 +286,17 @@ CRITICAL RULES:
   flags an acute or life-threatening finding.
 - The differential must be ranked 1..N (1 = most likely). Include 1–4 items.
 - ICD-10 only if confidently inferable from the synthesized picture; otherwise null.
+- `affected_regions` MUST list every anatomical region implicated by the input \
+  reports, using ONLY this controlled vocabulary: \
+  `left_upper`, `left_lower`, `right_upper`, `right_middle`, `right_lower`, \
+  `bilateral`, `pleural`, `mediastinal`, `airways`. \
+  For each region, provide: `finding` (one short clinical phrase, e.g. \
+  "consolidation", "honeycombing", "ground-glass opacity", "effusion"), \
+  `severity` (mild | moderate | severe), and `modalities` (which inputs \
+  localized this finding — image / audio / parameters). \
+  Use `bilateral` only when the finding is diffuse and clearly involves both \
+  lungs without a dominant lobe. If the inputs do not localize the disease \
+  to any specific region, return an empty list.
 
 Structure the `report_markdown` field as Markdown with these sections:
 
@@ -268,6 +317,10 @@ Green / yellow / red + the reasoning.
 
 ## Recommended next steps
 Concrete next actions, ordered by priority.
+
+## Affected regions
+Brief enumeration of the lung regions implicated and the modality that supports each. \
+Mirror the structured `affected_regions` field — one bullet per region.
 
 ## Limitations
 What synthesis cannot resolve and what was not collected.

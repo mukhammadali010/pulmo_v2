@@ -123,6 +123,21 @@
           </div>
         </section>
 
+        <!-- Affected lung regions (anatomical diagram) -->
+        <section
+          class="border-surface-200 bg-surface-0 dark:border-surface-700 dark:bg-surface-900 flex flex-col gap-3 rounded-2xl border p-5 shadow-sm"
+        >
+          <div class="flex flex-col gap-0.5">
+            <h3 class="text-surface-900 dark:text-surface-50 text-base font-semibold">
+              {{ 'finalDiagnosis.lungDiagram.title' | translate }}
+            </h3>
+            <p class="text-surface-500 dark:text-surface-400 text-xs">
+              {{ 'finalDiagnosis.lungDiagram.subtitle' | translate }}
+            </p>
+          </div>
+          <app-lung-diagram [regions]="p.affected_regions ?? []" />
+        </section>
+
         <!-- Differential -->
         <section
           class="border-surface-200 bg-surface-0 dark:border-surface-700 dark:bg-surface-900 flex flex-col gap-3 rounded-2xl border p-5 shadow-sm"

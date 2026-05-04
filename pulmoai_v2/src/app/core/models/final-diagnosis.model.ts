@@ -4,6 +4,24 @@ export type FinalDiagnosisConfidence = 'low' | 'moderate' | 'high';
 export type FinalDiagnosisUrgency = 'green' | 'yellow' | 'red';
 export type ModalityName = 'image' | 'audio' | 'parameters';
 export type ModalityVerdict = 'support' | 'contradict' | 'silent';
+export type LobeRegion =
+  | 'left_upper'
+  | 'left_lower'
+  | 'right_upper'
+  | 'right_middle'
+  | 'right_lower'
+  | 'bilateral'
+  | 'pleural'
+  | 'mediastinal'
+  | 'airways';
+export type SeverityLevel = 'mild' | 'moderate' | 'severe';
+
+export interface AffectedRegion {
+  region: LobeRegion;
+  finding: string;
+  severity: SeverityLevel;
+  modalities: ModalityName[];
+}
 
 export interface DifferentialItem {
   rank: number;
@@ -35,6 +53,7 @@ export interface FinalDiagnosisPayload {
   modality_consensus: ModalityConsensusMap;
   recommended_next_steps: string[];
   limitations: string[];
+  affected_regions?: AffectedRegion[];
   report_markdown: string;
 }
 

@@ -244,6 +244,28 @@
       "audio": "Audio",
       "parameters": "Parametrlar"
     },
+    "lungDiagram": {
+      "title": "Kasallangan o'pka qismlari",
+      "subtitle": "Modalliklar bo'yicha lokalizatsiya",
+      "noRegions": "Tahlil bu yakuniy xulosada lokalizatsiyani aniqlay olmadi.",
+      "otherFindings": "Boshqa topilmalar",
+      "severity": {
+        "mild": "Yengil",
+        "moderate": "O'rtacha",
+        "severe": "Og'ir"
+      },
+      "region": {
+        "left_upper": "Chap o'pka, yuqori bo'lak",
+        "left_lower": "Chap o'pka, pastki bo'lak",
+        "right_upper": "O'ng o'pka, yuqori bo'lak",
+        "right_middle": "O'ng o'pka, o'rta bo'lak",
+        "right_lower": "O'ng o'pka, pastki bo'lak",
+        "bilateral": "Ikki tomonlama (diffuz)",
+        "pleural": "Plevra bo'shlig'i",
+        "mediastinal": "Mediastinal soha",
+        "airways": "Nafas yo'llari"
+      }
+    },
     "sources": "Manba tahlillari",
     "saved": "Yakuniy xulosa saqlandi",
     "deleted": "Yakuniy xulosa o'chirildi",

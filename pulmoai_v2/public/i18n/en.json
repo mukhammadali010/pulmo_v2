@@ -244,6 +244,28 @@
       "audio": "Audio",
       "parameters": "Parameters"
     },
+    "lungDiagram": {
+      "title": "Affected lung regions",
+      "subtitle": "Localization across modalities",
+      "noRegions": "The synthesis could not localize the disease in this final diagnosis.",
+      "otherFindings": "Other findings",
+      "severity": {
+        "mild": "Mild",
+        "moderate": "Moderate",
+        "severe": "Severe"
+      },
+      "region": {
+        "left_upper": "Left lung, upper lobe",
+        "left_lower": "Left lung, lower lobe",
+        "right_upper": "Right lung, upper lobe",
+        "right_middle": "Right lung, middle lobe",
+        "right_lower": "Right lung, lower lobe",
+        "bilateral": "Bilateral (diffuse)",
+        "pleural": "Pleural space",
+        "mediastinal": "Mediastinum",
+        "airways": "Airways"
+      }
+    },
     "sources": "Source analyses",
     "saved": "Final diagnosis saved",
     "deleted": "Final diagnosis deleted",
