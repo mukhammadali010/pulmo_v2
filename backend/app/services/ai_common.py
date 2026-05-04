@@ -6,8 +6,9 @@ and DB plumbing are not duplicated.
 
 from __future__ import annotations
 
+import asyncio
 import logging
-from typing import Literal
+from typing import Awaitable, Callable, Literal, TypeVar
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -21,6 +22,49 @@ from app.models.final_diagnosis import FinalDiagnosis
 from app.models.patient import Patient
 
 logger = logging.getLogger(__name__)
+
+
+T = TypeVar("T")
+
+# 5xx and 429 are transient — retry. Other 4xx are caller errors — don't retry.
+_RETRY_STATUS_CODES = {429, 500, 502, 503, 504}
+_DEFAULT_MAX_RETRIES = 3
+_BASE_BACKOFF_S = 1.5
+
+
+async def call_gemini_with_retry(
+    fn: Callable[[], Awaitable[T]],
+    *,
+    label: str,
+    max_retries: int = _DEFAULT_MAX_RETRIES,
+) -> T:
+    """Run a Gemini API call with exponential backoff on transient errors.
+
+    Gemini 2.5 Flash regularly returns 503 UNAVAILABLE during demand spikes;
+    treating those as a hard failure surfaces a confusing error to the doctor
+    when a single retry would have succeeded.
+    """
+    from google.genai.errors import APIError
+
+    attempt = 0
+    while True:
+        try:
+            return await fn()
+        except APIError as exc:
+            code = getattr(exc, "code", None)
+            if code not in _RETRY_STATUS_CODES or attempt >= max_retries:
+                raise
+            wait = _BASE_BACKOFF_S * (2**attempt)
+            logger.warning(
+                "Gemini %s transient error (code=%s, attempt=%d/%d); retrying in %.1fs",
+                label,
+                code,
+                attempt + 1,
+                max_retries,
+                wait,
+            )
+            await asyncio.sleep(wait)
+            attempt += 1
 
 
 class DiagnosisOutput(BaseModel):

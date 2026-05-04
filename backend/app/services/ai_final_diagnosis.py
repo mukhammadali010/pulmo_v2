@@ -27,6 +27,7 @@ from app.models.final_diagnosis import (
 from app.services.ai_common import (
     SYSTEM_PROMPT_FINAL_DIAGNOSIS,
     FinalDiagnosisOutput,
+    call_gemini_with_retry,
     language_instruction,
     load_final_diagnosis,
     mark_final_failed,
@@ -69,10 +70,13 @@ async def analyze_final_diagnosis(
             _validate_inputs(final)
             user_text = _build_user_text(final, language)
 
-            response = await client.aio.models.generate_content(
-                model=settings.gemini_model,
-                contents=user_text,
-                config=_json_config(SYSTEM_PROMPT_FINAL_DIAGNOSIS, MAX_TOKENS),
+            response = await call_gemini_with_retry(
+                lambda: client.aio.models.generate_content(
+                    model=settings.gemini_model,
+                    contents=user_text,
+                    config=_json_config(SYSTEM_PROMPT_FINAL_DIAGNOSIS, MAX_TOKENS),
+                ),
+                label="final-synthesis",
             )
             output = _parse_output(response)
 

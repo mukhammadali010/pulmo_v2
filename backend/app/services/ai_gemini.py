@@ -21,6 +21,7 @@ from app.services.ai_common import (
     SYSTEM_PROMPT_IMAGE,
     SYSTEM_PROMPT_PARAMS,
     DiagnosisOutput,
+    call_gemini_with_retry,
     language_instruction,
     load_examination,
     patient_context,
@@ -123,10 +124,13 @@ async def _analyze_image(
         f"Please analyze this image.\n\n{language_instruction(language)}"
     )
 
-    response = await client.aio.models.generate_content(
-        model=model,
-        contents=[image_part, user_text],
-        config=_json_config(SYSTEM_PROMPT_IMAGE, MAX_TOKENS),
+    response = await call_gemini_with_retry(
+        lambda: client.aio.models.generate_content(
+            model=model,
+            contents=[image_part, user_text],
+            config=_json_config(SYSTEM_PROMPT_IMAGE, MAX_TOKENS),
+        ),
+        label="image",
     )
 
     return _parse_output(response)
@@ -147,10 +151,13 @@ async def _analyze_parameters(
         f"Please interpret these values.\n\n{language_instruction(language)}"
     )
 
-    response = await client.aio.models.generate_content(
-        model=model,
-        contents=user_text,
-        config=_json_config(SYSTEM_PROMPT_PARAMS, MAX_TOKENS),
+    response = await call_gemini_with_retry(
+        lambda: client.aio.models.generate_content(
+            model=model,
+            contents=user_text,
+            config=_json_config(SYSTEM_PROMPT_PARAMS, MAX_TOKENS),
+        ),
+        label="parameters",
     )
 
     return _parse_output(response)
@@ -185,10 +192,13 @@ async def _analyze_audio(
         f"{language_instruction(language)}"
     )
 
-    response = await client.aio.models.generate_content(
-        model=model,
-        contents=[audio_part, user_text],
-        config=_json_config(SYSTEM_PROMPT_AUDIO, MAX_TOKENS),
+    response = await call_gemini_with_retry(
+        lambda: client.aio.models.generate_content(
+            model=model,
+            contents=[audio_part, user_text],
+            config=_json_config(SYSTEM_PROMPT_AUDIO, MAX_TOKENS),
+        ),
+        label="audio",
     )
 
     return _parse_output(response)
