@@ -195,6 +195,7 @@
         formControlName="role"
         [options]="roleOptions"
         optionValue="value"
+        appendTo="body"
       >
         <ng-template #selectedItem let-option>{{ option.labelKey | translate }}</ng-template>
         <ng-template #item let-option>{{ option.labelKey | translate }}</ng-template>
