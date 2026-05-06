@@ -13,7 +13,6 @@ import json
 import logging
 from uuid import UUID
 
-from google import genai
 from google.genai import types as genai_types
 
 from app.config import get_settings
@@ -28,8 +27,10 @@ from app.services.ai_common import (
     SYSTEM_PROMPT_FINAL_DIAGNOSIS,
     FinalDiagnosisOutput,
     call_gemini_with_retry,
+    gemini_configured,
     language_instruction,
     load_final_diagnosis,
+    make_genai_client,
     mark_final_failed,
     patient_context,
 )
@@ -51,14 +52,16 @@ async def analyze_final_diagnosis(
     final_diagnosis_id: UUID, language: str = "uz"
 ) -> None:
     settings = get_settings()
-    if not settings.google_api_key:
+    if not gemini_configured(settings):
         await mark_final_failed(
             final_diagnosis_id,
-            "Gemini is not configured. Set GOOGLE_API_KEY to enable final-diagnosis synthesis.",
+            "Gemini is not configured. Set GOOGLE_API_KEY, or set "
+            "GOOGLE_GENAI_USE_VERTEXAI=true with GOOGLE_CLOUD_PROJECT, to enable "
+            "final-diagnosis synthesis.",
         )
         return
 
-    client = genai.Client(api_key=settings.google_api_key)
+    client = make_genai_client()
 
     async with AsyncSessionLocal() as session:
         final = await load_final_diagnosis(session, final_diagnosis_id)

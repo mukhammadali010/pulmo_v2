@@ -16,6 +16,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.config import Settings, get_settings
 from app.db.session import AsyncSessionLocal
 from app.models.examination import Examination, ExaminationStatus
 from app.models.final_diagnosis import FinalDiagnosis
@@ -25,6 +26,38 @@ logger = logging.getLogger(__name__)
 
 
 T = TypeVar("T")
+
+
+def gemini_configured(settings: Settings) -> bool:
+    """Whether a Gemini client can be constructed from current settings."""
+    if settings.google_genai_use_vertexai:
+        return bool(settings.google_cloud_project)
+    return bool(settings.google_api_key)
+
+
+def make_genai_client():
+    """Create a `google-genai` client in either AI Studio or Vertex AI mode.
+
+    Vertex mode authenticates through Application Default Credentials and routes
+    calls through the configured Google Cloud project, sidestepping the regional
+    blocks that the AI Studio endpoint applies to some countries.
+    """
+    from google import genai
+
+    settings = get_settings()
+    if settings.google_genai_use_vertexai:
+        if not settings.google_cloud_project:
+            raise ValueError(
+                "GOOGLE_CLOUD_PROJECT is required when GOOGLE_GENAI_USE_VERTEXAI=true"
+            )
+        return genai.Client(
+            vertexai=True,
+            project=settings.google_cloud_project,
+            location=settings.google_cloud_location,
+        )
+    if not settings.google_api_key:
+        raise ValueError("GOOGLE_API_KEY is required when GOOGLE_GENAI_USE_VERTEXAI=false")
+    return genai.Client(api_key=settings.google_api_key)
 
 # 5xx and 429 are transient — retry. Other 4xx are caller errors — don't retry.
 _RETRY_STATUS_CODES = {429, 500, 502, 503, 504}

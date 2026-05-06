@@ -43,6 +43,14 @@ class Settings(BaseSettings):
     gemini_model: str = "gemini-2.5-flash"
     google_api_key: str | None = None
 
+    # Vertex AI mode — bypasses AI Studio's regional restrictions by routing
+    # through the user's Google Cloud project. Authenticates via Application
+    # Default Credentials (`gcloud auth application-default login`); GOOGLE_API_KEY
+    # is ignored when this is enabled.
+    google_genai_use_vertexai: bool = False
+    google_cloud_project: str | None = None
+    google_cloud_location: str = "us-central1"
+
     # On first startup, if no admin exists in the DB, an admin is provisioned from
     # these settings. Subsequent startups skip the bootstrap.
     initial_admin_email: str | None = None

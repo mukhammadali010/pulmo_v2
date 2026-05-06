@@ -24,6 +24,7 @@ from app.services.ai_common import (
     call_gemini_with_retry,
     language_instruction,
     load_examination,
+    make_genai_client,
     patient_context,
 )
 from app.services.storage import examination_file_path
@@ -53,7 +54,7 @@ GEMINI_AUDIO_MIME_MAP = {
 
 async def analyze_examination(examination_id: UUID, language: str = "uz") -> None:
     settings = get_settings()
-    client = genai.Client(api_key=settings.google_api_key)
+    client = make_genai_client()
 
     async with AsyncSessionLocal() as session:
         examination = await load_examination(session, examination_id)

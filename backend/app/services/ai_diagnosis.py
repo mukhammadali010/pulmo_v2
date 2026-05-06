@@ -12,14 +12,16 @@ import logging
 from uuid import UUID
 
 from app.config import get_settings
-from app.services.ai_common import mark_failed, mark_final_failed
+from app.services.ai_common import gemini_configured, mark_failed, mark_final_failed
 
 logger = logging.getLogger(__name__)
 
 
 async def analyze_examination(examination_id: UUID, language: str = "uz") -> None:
     settings = get_settings()
-    provider = _resolve_provider(settings.ai_provider, settings.google_api_key, settings.anthropic_api_key)
+    provider = _resolve_provider(
+        settings.ai_provider, gemini_configured(settings), settings.anthropic_api_key
+    )
 
     if provider == "gemini":
         from app.services import ai_gemini
@@ -32,7 +34,9 @@ async def analyze_examination(examination_id: UUID, language: str = "uz") -> Non
     else:
         message = (
             "AI service is not configured. Set GOOGLE_API_KEY (free tier at "
-            "https://aistudio.google.com/app/apikey) or ANTHROPIC_API_KEY."
+            "https://aistudio.google.com/app/apikey), enable Vertex AI mode "
+            "with GOOGLE_GENAI_USE_VERTEXAI=true and GOOGLE_CLOUD_PROJECT, "
+            "or set ANTHROPIC_API_KEY."
         )
         logger.error(message)
         await mark_failed(examination_id, message)
@@ -45,13 +49,14 @@ async def analyze_final_diagnosis(
 
     Synthesis consumes the per-examination Markdown reports (already produced),
     so it works even when the per-examination provider was Claude — but it
-    requires GOOGLE_API_KEY for the synthesis step itself.
+    requires Gemini (AI Studio key or Vertex AI) for the synthesis step itself.
     """
     settings = get_settings()
-    if not settings.google_api_key:
+    if not gemini_configured(settings):
         message = (
-            "Final-diagnosis synthesis requires GOOGLE_API_KEY (Gemini). "
-            "Get a free key at https://aistudio.google.com/app/apikey."
+            "Final-diagnosis synthesis requires Gemini. Set GOOGLE_API_KEY "
+            "(https://aistudio.google.com/app/apikey) or enable Vertex AI mode "
+            "with GOOGLE_GENAI_USE_VERTEXAI=true and GOOGLE_CLOUD_PROJECT."
         )
         logger.error(message)
         await mark_final_failed(final_diagnosis_id, message)
@@ -63,14 +68,14 @@ async def analyze_final_diagnosis(
 
 
 def _resolve_provider(
-    setting: str, google_key: str | None, anthropic_key: str | None
+    setting: str, gemini_ready: bool, anthropic_key: str | None
 ) -> str | None:
-    if setting == "gemini" and google_key:
+    if setting == "gemini" and gemini_ready:
         return "gemini"
     if setting == "anthropic" and anthropic_key:
         return "anthropic"
     if setting == "auto":
-        if google_key:
+        if gemini_ready:
             return "gemini"
         if anthropic_key:
             return "anthropic"
