@@ -11,3 +11,6 @@ venv/
 .coverage
 dist/
 build/
+
+# Patient examination uploads — never commit clinical data
+storage/examinations/
