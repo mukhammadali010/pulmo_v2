@@ -10,6 +10,8 @@
     "searchPlaceholder": "Search...",
     "loading": "Loading...",
     "all": "All",
+    "yes": "Yes",
+    "no": "No",
     "toggleSidebar": "Toggle sidebar"
   },
   "theme": {
@@ -252,6 +254,7 @@
       "rotateHint": "Drag to rotate",
       "loading": "Loading 3D model...",
       "severity": {
+        "healthy": "Healthy",
         "mild": "Mild",
         "moderate": "Moderate",
         "severe": "Severe"
@@ -310,5 +313,166 @@
     "previousValue": "Previous",
     "latestValue": "Latest",
     "delta": "Change"
+  },
+  "clinicalScales": {
+    "tabTitle": "Clinical scales",
+    "save": "Calculate and save",
+    "saved": "Scale saved",
+    "totalScore": "Total score",
+    "preview": "Preview",
+    "breakdown": "Per-criterion breakdown",
+    "reference": "Reference",
+    "notMeasured": "not measured",
+    "empty": {
+      "title": "No scales calculated yet",
+      "description": "Use the calculator on the right to compute clinical risk scores for this patient."
+    },
+    "severity": {
+      "low": "Low risk",
+      "moderate": "Moderate risk",
+      "high": "High risk"
+    },
+    "source": {
+      "fromPatient": "Auto-filled from patient profile",
+      "lastParameters": "Pre-filled from last parameters exam"
+    },
+    "crb65": {
+      "title": "CRB-65",
+      "short": "CRB-65",
+      "subtitle": "Community-acquired pneumonia severity score",
+      "description": "Predicts 30-day mortality risk in community-acquired pneumonia and informs the decision between outpatient, ward, and ICU care.",
+      "interpretation": "How to interpret the score?",
+      "interpretation0": "Low risk — outpatient management is reasonable",
+      "interpretation1_2": "Moderate risk — consider hospital admission",
+      "interpretation3_4": "High risk — urgent admission, consider ICU",
+      "systolic": "Systolic",
+      "diastolic": "Diastolic",
+      "noDateOfBirth": "Date of birth not set",
+      "criteria": {
+        "confusion": "Confusion",
+        "respiratory_rate": "Respiratory rate",
+        "blood_pressure": "Blood pressure",
+        "age": "Age"
+      },
+      "help": {
+        "confusion": "Score 1 if the patient has new-onset disorientation in time/place, or AMTS ≤ 8.",
+        "respiratoryRate": "Score 1 if ≥ 30 breaths/min, otherwise 0.",
+        "bloodPressure": "Score 1 if systolic < 90 mmHg OR diastolic ≤ 60 mmHg. Both being low still scores 1.",
+        "age": "Score 1 if age ≥ 65 years. Age is auto-computed from the patient's date of birth."
+      }
+    },
+    "cat": {
+      "title": "CAT — COPD Assessment Test",
+      "short": "CAT",
+      "subtitle": "Patient-reported COPD impact (8 items)",
+      "description": "Patient rates 8 items from 0 (best) to 5 (worst). Sum reflects overall impact of COPD on the patient's daily life.",
+      "instructions": "For each item, pick a number 0–5 reflecting how strongly the patient feels this symptom.",
+      "severity": {
+        "low": "Low impact",
+        "medium": "Medium impact",
+        "high": "High impact",
+        "veryHigh": "Very high impact"
+      },
+      "scale": {
+        "0": "0 — none",
+        "1": "1",
+        "2": "2",
+        "3": "3",
+        "4": "4",
+        "5": "5 — worst"
+      },
+      "q": {
+        "cough": "Cough",
+        "cough_low": "I never cough",
+        "cough_high": "I cough all the time",
+        "phlegm": "Phlegm",
+        "phlegm_low": "No phlegm in my chest",
+        "phlegm_high": "My chest is full of phlegm",
+        "chestTightness": "Chest tightness",
+        "chestTightness_low": "No chest tightness",
+        "chestTightness_high": "My chest feels very tight",
+        "breathlessness": "Breathlessness on stairs",
+        "breathlessness_low": "Not breathless",
+        "breathlessness_high": "Very breathless",
+        "activityLimitation": "Home activity limitation",
+        "activityLimitation_low": "Not limited",
+        "activityLimitation_high": "Very limited",
+        "confidence": "Confidence leaving home",
+        "confidence_low": "Confident",
+        "confidence_high": "Not confident at all",
+        "sleep": "Sleep",
+        "sleep_low": "Sleep soundly",
+        "sleep_high": "Don't sleep well",
+        "energy": "Energy",
+        "energy_low": "Lots of energy",
+        "energy_high": "No energy at all"
+      }
+    },
+    "gina": {
+      "title": "GINA — Asthma exacerbation severity",
+      "short": "GINA",
+      "subtitle": "Acute asthma exacerbation classification (GINA 2009)",
+      "description": "Classifies asthma exacerbation severity from pulse, PEF (% personal best), SaO2, and respiratory rate. The worst-classified parameter wins.",
+      "instructions": "Enter any vitals you have — at least one is enough. The worst classification determines the result.",
+      "severity": {
+        "unknown": "Unknown",
+        "mild": "Mild exacerbation",
+        "moderate": "Moderate exacerbation",
+        "severe": "Severe exacerbation"
+      },
+      "criteria": {
+        "pulse": "Pulse",
+        "pef_pct": "PEF (% personal best)",
+        "sao2": "SaO₂",
+        "respiratory_rate": "Respiratory rate"
+      },
+      "help": {
+        "pulse": "<100 mild, 100-120 moderate, >120 severe",
+        "pefPct": "Percentage of patient's personal best PEF. >80% mild, 60-80% moderate, <60% severe.",
+        "sao2": ">95% mild, 91-95% moderate, <90% severe",
+        "respiratoryRate": ">30/min severe; increased otherwise mild/moderate"
+      }
+    },
+    "mmrc": {
+      "title": "mMRC — Dyspnea Scale",
+      "short": "mMRC",
+      "subtitle": "Modified Medical Research Council",
+      "description": "Functional impact of dyspnea on daily activity — 5 grades (0-4). Pick the description that best matches the patient.",
+      "instructions": "Choose the grade that best matches the patient's dyspnea.",
+      "severity": {
+        "mild": "Mild",
+        "moderate": "Moderate",
+        "severe": "Severe"
+      },
+      "grades": {
+        "0": "0 — Dyspnea only with strenuous exercise",
+        "1": "1 — Dyspnea when hurrying or walking up a slight hill",
+        "2": "2 — Walks slower than peers, or stops for breath at own pace",
+        "3": "3 — Stops for breath after 100m or after a few minutes",
+        "4": "4 — Too breathless to leave the house, or breathless when dressing"
+      }
+    },
+    "gold": {
+      "title": "GOLD — COPD Stage",
+      "short": "GOLD",
+      "subtitle": "Spirometric stage (FEV₁ % predicted)",
+      "description": "GOLD spirometric stage from post-bronchodilator FEV₁ % predicted. Diagnosis of COPD requires FEV₁/FVC < 0.70.",
+      "instructions": "Enter post-bronchodilator FEV₁ as % predicted. Optionally include FEV₁/FVC ratio — if ≥ 0.70 the result will warn that COPD isn't confirmed.",
+      "severity": {
+        "unknown": "Unknown",
+        "gold1": "GOLD 1 — Mild",
+        "gold2": "GOLD 2 — Moderate",
+        "gold3": "GOLD 3 — Severe",
+        "gold4": "GOLD 4 — Very severe"
+      },
+      "criteria": {
+        "fev1_pct_predicted": "FEV₁ % predicted",
+        "fev1_fvc_ratio": "FEV₁/FVC ratio"
+      },
+      "help": {
+        "fev1Pct": "GOLD 1 ≥80%, GOLD 2 50-79%, GOLD 3 30-49%, GOLD 4 <30%. Use post-bronchodilator value.",
+        "fev1Fvc": "<0.70 confirms COPD. Optional but recommended."
+      }
+    }
   }
 }

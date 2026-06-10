@@ -26,11 +26,10 @@ from app.models.final_diagnosis import (
 from app.services.ai_common import (
     SYSTEM_PROMPT_FINAL_DIAGNOSIS,
     FinalDiagnosisOutput,
-    call_gemini_with_retry,
     gemini_configured,
+    generate_with_gemini,
     language_instruction,
     load_final_diagnosis,
-    make_genai_client,
     mark_final_failed,
     patient_context,
 )
@@ -45,6 +44,15 @@ _TYPE_LABEL = {
     ExaminationType.MRI: "MRI scan",
     ExaminationType.AUDIO: "Respiratory audio",
     ExaminationType.PARAMETERS: "Pulmonary parameters",
+    ExaminationType.CLINICAL_SCALE: "Clinical scoring scale",
+}
+
+_CLINICAL_SCALE_LABEL = {
+    "crb_65": "CRB-65 (CAP severity)",
+    "cat": "CAT (COPD Assessment Test)",
+    "gina_severity": "GINA asthma exacerbation severity",
+    "mmrc": "mMRC dyspnea grade",
+    "gold_stage": "GOLD COPD spirometric stage",
 }
 
 
@@ -61,8 +69,6 @@ async def analyze_final_diagnosis(
         )
         return
 
-    client = make_genai_client()
-
     async with AsyncSessionLocal() as session:
         final = await load_final_diagnosis(session, final_diagnosis_id)
         if final is None:
@@ -73,8 +79,8 @@ async def analyze_final_diagnosis(
             _validate_inputs(final)
             user_text = _build_user_text(final, language)
 
-            response = await call_gemini_with_retry(
-                lambda: client.aio.models.generate_content(
+            response = await generate_with_gemini(
+                lambda c: c.aio.models.generate_content(
                     model=settings.gemini_model,
                     contents=user_text,
                     config=_json_config(SYSTEM_PROMPT_FINAL_DIAGNOSIS, MAX_TOKENS),
@@ -109,7 +115,13 @@ def _validate_inputs(final: FinalDiagnosis) -> None:
     if not_done:
         ids = ", ".join(str(e.id) for e in not_done)
         raise ValueError(f"Source examinations not analyzed yet: {ids}")
-    no_report = [e for e in final.examinations if not e.ai_report]
+    # Clinical-scale examinations are deterministic (no AI step) so they have
+    # ai_report=None by design — exempt them from the report-required check.
+    no_report = [
+        e
+        for e in final.examinations
+        if not e.ai_report and e.type != ExaminationType.CLINICAL_SCALE
+    ]
     if no_report:
         ids = ", ".join(str(e.id) for e in no_report)
         raise ValueError(f"Source examinations missing AI report: {ids}")
@@ -132,15 +144,61 @@ def _build_user_text(final: FinalDiagnosis, language: str) -> str:
     for idx, exam in enumerate(_sorted_for_prompt(final.examinations), start=1):
         label = _TYPE_LABEL.get(exam.type, exam.type.value)
         date = exam.created_at.date().isoformat() if exam.created_at else "unknown date"
-        block = (
-            f"=== Examination {idx} — {label} ({date}) ===\n"
-            f"Summary: {exam.ai_summary or '(no summary)'}\n"
-            f"Full report:\n{exam.ai_report}"
-        )
+        if exam.type == ExaminationType.CLINICAL_SCALE:
+            block = _format_clinical_scale_block(exam, idx, date)
+        else:
+            block = (
+                f"=== Examination {idx} — {label} ({date}) ===\n"
+                f"Summary: {exam.ai_summary or '(no summary)'}\n"
+                f"Full report:\n{exam.ai_report}"
+            )
         parts.append(block)
 
     parts.append(language_instruction(language))
     return "\n\n".join(parts)
+
+
+def _format_clinical_scale_block(exam: Examination, idx: int, date: str) -> str:
+    """Render a clinical-scale examination as a structured prompt block.
+
+    Clinical scales are deterministic and have no `ai_report`, so we project
+    their JSONB result (score, severity, breakdown, recommendation) into a
+    block the synthesis model can cite alongside imaging/audio/parameter
+    reports. The breakdown matters: it tells the model which criteria
+    actually contributed (e.g. "Age ≥65 contributed 1 point") so the model
+    can reason about the score, not just quote it.
+    """
+    p = exam.parameters or {}
+    scale_type = str(p.get("scaleType", "unknown"))
+    scale_label = _CLINICAL_SCALE_LABEL.get(scale_type, scale_type)
+    score = p.get("score", "?")
+    score_max = p.get("scoreMax", "?")
+    severity = p.get("severity", "unknown")
+    severity_label = p.get("severityLabel", severity)
+    recommendation = p.get("recommendation", "(no recommendation)")
+    reference = p.get("reference", "")
+
+    breakdown_lines: list[str] = []
+    for item in p.get("breakdown", []):
+        key = item.get("key", "?")
+        label_en = item.get("labelEn", key)
+        value = item.get("value")
+        points = item.get("points", 0)
+        missing = item.get("missing", False)
+        line = f"  - {label_en}: value={value}, points=+{points}"
+        if missing:
+            line += " (NOT MEASURED)"
+        breakdown_lines.append(line)
+    breakdown_text = "\n".join(breakdown_lines) if breakdown_lines else "  (no breakdown)"
+
+    return (
+        f"=== Examination {idx} — Clinical scoring scale ({date}) ===\n"
+        f"Scale: {scale_label}\n"
+        f"Score: {score}/{score_max} — {severity} ({severity_label})\n"
+        f"Per-criterion breakdown:\n{breakdown_text}\n"
+        f"Built-in recommendation: {recommendation}\n"
+        f"Reference: {reference}"
+    )
 
 
 def _sorted_for_prompt(examinations: list[Examination]) -> list[Examination]:
@@ -155,6 +213,7 @@ def _sorted_for_prompt(examinations: list[Examination]) -> list[Examination]:
         ExaminationType.MRI: 0,
         ExaminationType.AUDIO: 1,
         ExaminationType.PARAMETERS: 2,
+        ExaminationType.CLINICAL_SCALE: 3,
     }
     return sorted(
         examinations,

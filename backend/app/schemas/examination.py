@@ -50,3 +50,18 @@ class ParameterExaminationCreate(_CamelModel):
     patient_id: UUID
     parameters: dict[str, Any]
     notes: str | None = Field(default=None, max_length=2000)
+
+
+class ClinicalScaleCreate(_CamelModel):
+    """Request body for POST /examinations/clinical-scale.
+
+    Doctor submits scale_type + raw inputs; the server runs the deterministic
+    calculator and persists the result. Doctors do NOT submit pre-computed
+    scores — the server is the source of truth so a buggy frontend can't
+    record a bad score against a patient.
+    """
+
+    patient_id: UUID
+    scale_type: str = Field(..., description="One of clinical_scales.ScaleType values, e.g. 'crb_65'")
+    inputs: dict[str, Any] = Field(..., description="Raw inputs for the scale; shape depends on scale_type")
+    notes: str | None = Field(default=None, max_length=2000)

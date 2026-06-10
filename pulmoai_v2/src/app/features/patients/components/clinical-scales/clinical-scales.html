@@ -1,0 +1,642 @@
+<div class="grid gap-6 lg:grid-cols-[1fr_28rem]">
+  <!-- LEFT: history of saved scale results -->
+  <section class="flex flex-col gap-4">
+    @if (examinations().length === 0) {
+      <div
+        class="border-surface-200 bg-surface-0 dark:border-surface-700 dark:bg-surface-900 flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed p-12 text-center"
+      >
+        <div
+          class="bg-surface-100 dark:bg-surface-800 text-surface-400 flex h-14 w-14 items-center justify-center rounded-full"
+        >
+          <i class="pi pi-calculator text-xl"></i>
+        </div>
+        <div class="flex flex-col gap-1">
+          <p class="text-surface-700 dark:text-surface-200 text-sm font-medium">
+            {{ 'clinicalScales.empty.title' | translate }}
+          </p>
+          <p class="text-surface-500 dark:text-surface-400 text-xs">
+            {{ 'clinicalScales.empty.description' | translate }}
+          </p>
+        </div>
+      </div>
+    } @else {
+      @for (exam of examinations(); track exam.id) {
+        @if (resultOf(exam); as r) {
+          <article
+            class="border-surface-200 bg-surface-0 dark:border-surface-700 dark:bg-surface-900 group flex flex-col gap-4 rounded-2xl border p-5 shadow-sm"
+          >
+            <header class="flex items-start justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <div
+                  class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 text-white shadow-sm"
+                >
+                  <i class="pi pi-calculator text-sm"></i>
+                </div>
+                <div class="flex flex-col gap-0.5">
+                  <span class="text-surface-700 dark:text-surface-200 text-sm font-semibold">
+                    {{ scaleTitleKey(r.scaleType) | translate }}
+                  </span>
+                  <span
+                    class="text-surface-500 dark:text-surface-400 inline-flex items-center gap-1.5 text-xs"
+                  >
+                    <i class="pi pi-clock text-[10px]"></i>
+                    {{ exam.createdAt | date: 'medium' }}
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                class="text-surface-400 hover:text-rose-500 opacity-0 transition-opacity group-hover:opacity-100"
+                (click)="remove(exam.id)"
+                [attr.aria-label]="'patients.delete' | translate"
+              >
+                <i class="pi pi-trash text-sm"></i>
+              </button>
+            </header>
+
+            <!-- Score + severity banner -->
+            <div
+              class="flex flex-wrap items-center gap-4 rounded-xl border p-4"
+              [class]="severityClass(r.severity)"
+            >
+              <div class="flex flex-col items-center gap-0.5">
+                <span class="text-[10px] font-medium uppercase tracking-wide opacity-70">
+                  {{ 'clinicalScales.totalScore' | translate }}
+                </span>
+                <span class="text-3xl font-bold leading-none">
+                  {{ r.score }}<span class="text-lg opacity-50">/{{ r.scoreMax }}</span>
+                </span>
+              </div>
+              <div class="h-10 w-px bg-current opacity-20"></div>
+              <div class="flex flex-1 flex-col gap-0.5">
+                <div class="flex items-center gap-2">
+                  <span class="h-2 w-2 rounded-full" [class]="severityDot(r.severity)"></span>
+                  <span class="text-sm font-bold uppercase tracking-wide">
+                    {{ r.severityLabel }}
+                  </span>
+                </div>
+                <p class="text-xs leading-relaxed whitespace-pre-line">{{ r.recommendation }}</p>
+              </div>
+            </div>
+
+            <!-- Per-criterion breakdown -->
+            <div class="flex flex-col gap-2">
+              <h4
+                class="text-surface-600 dark:text-surface-300 text-[11px] font-semibold uppercase tracking-wide"
+              >
+                {{ 'clinicalScales.breakdown' | translate }}
+              </h4>
+              <div class="flex flex-col gap-1.5">
+                @for (item of r.breakdown; track item.key) {
+                  <div
+                    class="border-surface-200 dark:border-surface-700/60 flex items-center justify-between gap-3 rounded-lg border bg-surface-50 dark:bg-surface-800/40 px-3 py-2"
+                  >
+                    <div class="flex flex-col gap-0.5 min-w-0 flex-1">
+                      <span
+                        class="text-surface-700 dark:text-surface-200 text-xs font-medium truncate"
+                      >
+                        {{ breakdownLabelKey(r.scaleType, item.key) | translate }}
+                      </span>
+                      <span class="text-surface-500 dark:text-surface-400 text-[11px]">
+                        {{ formatBreakdownValue(item.value, item.key, r.scaleType) }}
+                        @if (item.missing) {
+                          <span class="ml-1 italic">
+                            ({{ 'clinicalScales.notMeasured' | translate }})
+                          </span>
+                        }
+                      </span>
+                    </div>
+                    <span
+                      class="shrink-0 rounded-md px-2 py-0.5 text-xs font-bold"
+                      [class]="
+                        item.points > 0
+                          ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300'
+                          : 'bg-surface-100 text-surface-500 dark:bg-surface-800 dark:text-surface-400'
+                      "
+                    >
+                      +{{ item.points }}
+                    </span>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Reference -->
+            <p
+              class="text-surface-400 dark:text-surface-500 text-[10px] italic border-t border-surface-200 dark:border-surface-700 pt-2"
+            >
+              {{ 'clinicalScales.reference' | translate }}: {{ r.reference }}
+            </p>
+
+            @if (exam.notes) {
+              <p
+                class="text-surface-700 dark:text-surface-200 text-xs border-t border-surface-200 dark:border-surface-700 pt-2"
+              >
+                <i class="pi pi-file-edit mr-1 text-[10px]"></i>
+                {{ exam.notes }}
+              </p>
+            }
+          </article>
+        }
+      }
+    }
+  </section>
+
+  <!-- RIGHT: calculator form -->
+  <aside
+    class="border-surface-200 bg-surface-0 dark:border-surface-700 dark:bg-surface-900 flex h-fit flex-col overflow-hidden rounded-2xl border shadow-sm"
+  >
+    <header
+      class="relative flex items-center gap-3 overflow-hidden bg-gradient-to-br from-indigo-500 via-violet-500 to-purple-500 px-5 py-4 text-white"
+    >
+      <div
+        class="absolute -top-8 -right-8 h-24 w-24 rounded-full bg-white/15 blur-2xl"
+        aria-hidden="true"
+      ></div>
+      <div
+        class="relative flex h-9 w-9 items-center justify-center rounded-lg bg-white/20 backdrop-blur"
+      >
+        <i class="pi pi-calculator text-sm"></i>
+      </div>
+      <div class="relative flex flex-col">
+        <h3 class="text-sm font-semibold">
+          {{ scaleTitleKey(selectedScale()) | translate }}
+        </h3>
+        <span class="text-[11px] text-white/80">
+          {{ scaleSubtitleKey(selectedScale()) | translate }}
+        </span>
+      </div>
+    </header>
+
+    <!-- Scale selector chips -->
+    <div
+      class="border-surface-200 dark:border-surface-700 flex flex-wrap gap-1.5 border-b px-4 py-3"
+    >
+      @for (scale of scales; track scale.value) {
+        <button
+          type="button"
+          (click)="selectScale(scale.value)"
+          class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-colors"
+          [class]="
+            selectedScale() === scale.value
+              ? 'bg-indigo-500 text-white shadow-sm'
+              : 'bg-surface-100 text-surface-700 hover:bg-surface-200 dark:bg-surface-800 dark:text-surface-200 dark:hover:bg-surface-700'
+          "
+        >
+          <i class="pi text-[10px]" [class]="scale.iconKey"></i>
+          {{ scale.labelKey | translate }}
+        </button>
+      }
+    </div>
+
+    <div class="flex flex-col gap-4 p-5">
+      <!-- Description -->
+      <p class="text-surface-500 dark:text-surface-400 text-[11px] leading-relaxed">
+        {{ scaleDescriptionKey(selectedScale()) | translate }}
+      </p>
+
+      <!-- ============= CRB-65 form ============= -->
+      @if (selectedScale() === 'crb_65') {
+        <form [formGroup]="crbForm" class="flex flex-col gap-3">
+          <fieldset
+            class="border-surface-200 dark:border-surface-700/70 flex flex-col gap-2 rounded-lg border p-3"
+          >
+            <legend
+              class="px-1.5 text-[11px] font-semibold uppercase tracking-wide text-surface-700 dark:text-surface-200"
+            >
+              C — {{ 'clinicalScales.crb65.criteria.confusion' | translate }}
+            </legend>
+            <p class="text-surface-500 dark:text-surface-400 text-[11px]">
+              {{ 'clinicalScales.crb65.help.confusion' | translate }}
+            </p>
+            <p-select
+              [options]="confusionOptions"
+              formControlName="confusion"
+              optionLabel="labelKey"
+              optionValue="value"
+              styleClass="w-full"
+            >
+              <ng-template let-opt pTemplate="selectedItem">
+                {{ opt.labelKey | translate }}
+              </ng-template>
+              <ng-template let-opt pTemplate="item">
+                {{ opt.labelKey | translate }}
+              </ng-template>
+            </p-select>
+          </fieldset>
+
+          <fieldset
+            class="border-surface-200 dark:border-surface-700/70 flex flex-col gap-2 rounded-lg border p-3"
+          >
+            <legend
+              class="px-1.5 text-[11px] font-semibold uppercase tracking-wide text-surface-700 dark:text-surface-200"
+            >
+              R — {{ 'clinicalScales.crb65.criteria.respiratory_rate' | translate }}
+            </legend>
+            <p class="text-surface-500 dark:text-surface-400 text-[11px]">
+              {{ 'clinicalScales.crb65.help.respiratoryRate' | translate }}
+            </p>
+            <p-inputNumber
+              formControlName="respiratoryRate"
+              [min]="0"
+              [max]="80"
+              [maxFractionDigits]="0"
+              placeholder="16 /min"
+              suffix=" /min"
+              styleClass="w-full"
+              inputStyleClass="w-full"
+            />
+            @if (rrSource(); as src) {
+              <span
+                class="text-emerald-700 dark:text-emerald-400 inline-flex items-center gap-1 text-[10px]"
+              >
+                <i class="pi pi-check-circle text-[10px]"></i>
+                {{ src | translate }}
+              </span>
+            }
+          </fieldset>
+
+          <fieldset
+            class="border-surface-200 dark:border-surface-700/70 flex flex-col gap-2 rounded-lg border p-3"
+          >
+            <legend
+              class="px-1.5 text-[11px] font-semibold uppercase tracking-wide text-surface-700 dark:text-surface-200"
+            >
+              B — {{ 'clinicalScales.crb65.criteria.blood_pressure' | translate }}
+            </legend>
+            <p class="text-surface-500 dark:text-surface-400 text-[11px]">
+              {{ 'clinicalScales.crb65.help.bloodPressure' | translate }}
+            </p>
+            <div class="grid grid-cols-2 gap-2">
+              <div class="flex flex-col gap-1">
+                <label class="text-surface-600 dark:text-surface-300 text-[10px] font-medium">
+                  {{ 'clinicalScales.crb65.systolic' | translate }} (mmHg)
+                </label>
+                <p-inputNumber
+                  formControlName="systolicBp"
+                  [min]="0"
+                  [max]="300"
+                  [maxFractionDigits]="0"
+                  placeholder="120"
+                  styleClass="w-full"
+                  inputStyleClass="w-full"
+                />
+              </div>
+              <div class="flex flex-col gap-1">
+                <label class="text-surface-600 dark:text-surface-300 text-[10px] font-medium">
+                  {{ 'clinicalScales.crb65.diastolic' | translate }} (mmHg)
+                </label>
+                <p-inputNumber
+                  formControlName="diastolicBp"
+                  [min]="0"
+                  [max]="200"
+                  [maxFractionDigits]="0"
+                  placeholder="80"
+                  styleClass="w-full"
+                  inputStyleClass="w-full"
+                />
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset
+            class="border-surface-200 dark:border-surface-700/70 flex flex-col gap-2 rounded-lg border p-3"
+          >
+            <legend
+              class="px-1.5 text-[11px] font-semibold uppercase tracking-wide text-surface-700 dark:text-surface-200"
+            >
+              65 — {{ 'clinicalScales.crb65.criteria.age' | translate }}
+            </legend>
+            <p class="text-surface-500 dark:text-surface-400 text-[11px]">
+              {{ 'clinicalScales.crb65.help.age' | translate }}
+            </p>
+            <div
+              class="bg-surface-50 dark:bg-surface-800/40 flex items-center justify-between rounded-md px-3 py-2"
+            >
+              <span class="text-surface-700 dark:text-surface-200 text-sm font-semibold">
+                @if (patientAge() !== null) {
+                  {{ patientAge() }} {{ 'patients.years' | translate }}
+                } @else {
+                  <span class="text-surface-400 italic">
+                    {{ 'clinicalScales.crb65.noDateOfBirth' | translate }}
+                  </span>
+                }
+              </span>
+              <span
+                class="text-emerald-700 dark:text-emerald-400 inline-flex items-center gap-1 text-[10px]"
+              >
+                <i class="pi pi-check-circle text-[10px]"></i>
+                {{ 'clinicalScales.source.fromPatient' | translate }}
+              </span>
+            </div>
+          </fieldset>
+        </form>
+      }
+
+      <!-- ============= CAT form ============= -->
+      @if (selectedScale() === 'cat') {
+        <form [formGroup]="catForm" class="flex flex-col gap-3">
+          <p
+            class="text-surface-500 dark:text-surface-400 rounded-md bg-indigo-50 dark:bg-indigo-950/30 p-2 text-[11px]"
+          >
+            <i class="pi pi-info-circle mr-1 text-[10px]"></i>
+            {{ 'clinicalScales.cat.instructions' | translate }}
+          </p>
+          @for (key of catKeys; track key) {
+            <fieldset
+              class="border-surface-200 dark:border-surface-700/70 flex flex-col gap-1.5 rounded-lg border p-3"
+            >
+              <legend
+                class="px-1.5 text-[10px] font-semibold uppercase tracking-wide text-surface-700 dark:text-surface-200"
+              >
+                {{ 'clinicalScales.cat.q.' + key | translate }}
+              </legend>
+              <div class="flex items-center justify-between gap-1">
+                @for (n of [0, 1, 2, 3, 4, 5]; track n) {
+                  <button
+                    type="button"
+                    (click)="catForm.controls[key].setValue(n)"
+                    class="h-9 w-9 rounded-md text-xs font-semibold transition-colors"
+                    [class]="
+                      catForm.controls[key].value === n
+                        ? 'bg-indigo-500 text-white'
+                        : 'bg-surface-100 text-surface-600 hover:bg-surface-200 dark:bg-surface-800 dark:text-surface-300 dark:hover:bg-surface-700'
+                    "
+                  >
+                    {{ n }}
+                  </button>
+                }
+              </div>
+              <div
+                class="text-surface-400 dark:text-surface-500 flex justify-between text-[9px]"
+              >
+                <span>{{ 'clinicalScales.cat.q.' + key + '_low' | translate }}</span>
+                <span>{{ 'clinicalScales.cat.q.' + key + '_high' | translate }}</span>
+              </div>
+            </fieldset>
+          }
+        </form>
+      }
+
+      <!-- ============= GINA form ============= -->
+      @if (selectedScale() === 'gina_severity') {
+        <form [formGroup]="ginaForm" class="flex flex-col gap-3">
+          <p
+            class="text-surface-500 dark:text-surface-400 rounded-md bg-indigo-50 dark:bg-indigo-950/30 p-2 text-[11px]"
+          >
+            <i class="pi pi-info-circle mr-1 text-[10px]"></i>
+            {{ 'clinicalScales.gina.instructions' | translate }}
+          </p>
+
+          <fieldset
+            class="border-surface-200 dark:border-surface-700/70 flex flex-col gap-1.5 rounded-lg border p-3"
+          >
+            <legend
+              class="px-1.5 text-[11px] font-semibold uppercase tracking-wide text-surface-700 dark:text-surface-200"
+            >
+              {{ 'clinicalScales.gina.criteria.pulse' | translate }}
+            </legend>
+            <p class="text-surface-500 dark:text-surface-400 text-[11px]">
+              {{ 'clinicalScales.gina.help.pulse' | translate }}
+            </p>
+            <p-inputNumber
+              formControlName="pulse"
+              [min]="0"
+              [max]="250"
+              [maxFractionDigits]="0"
+              placeholder="100"
+              suffix=" bpm"
+              styleClass="w-full"
+              inputStyleClass="w-full"
+            />
+          </fieldset>
+
+          <fieldset
+            class="border-surface-200 dark:border-surface-700/70 flex flex-col gap-1.5 rounded-lg border p-3"
+          >
+            <legend
+              class="px-1.5 text-[11px] font-semibold uppercase tracking-wide text-surface-700 dark:text-surface-200"
+            >
+              {{ 'clinicalScales.gina.criteria.pef_pct' | translate }}
+            </legend>
+            <p class="text-surface-500 dark:text-surface-400 text-[11px]">
+              {{ 'clinicalScales.gina.help.pefPct' | translate }}
+            </p>
+            <p-inputNumber
+              formControlName="pefPct"
+              [min]="0"
+              [max]="200"
+              [maxFractionDigits]="1"
+              placeholder="80"
+              suffix=" %"
+              styleClass="w-full"
+              inputStyleClass="w-full"
+            />
+          </fieldset>
+
+          <fieldset
+            class="border-surface-200 dark:border-surface-700/70 flex flex-col gap-1.5 rounded-lg border p-3"
+          >
+            <legend
+              class="px-1.5 text-[11px] font-semibold uppercase tracking-wide text-surface-700 dark:text-surface-200"
+            >
+              {{ 'clinicalScales.gina.criteria.sao2' | translate }}
+            </legend>
+            <p class="text-surface-500 dark:text-surface-400 text-[11px]">
+              {{ 'clinicalScales.gina.help.sao2' | translate }}
+            </p>
+            <p-inputNumber
+              formControlName="sao2"
+              [min]="0"
+              [max]="100"
+              [maxFractionDigits]="0"
+              placeholder="98"
+              suffix=" %"
+              styleClass="w-full"
+              inputStyleClass="w-full"
+            />
+            @if (sao2Source(); as src) {
+              <span
+                class="text-emerald-700 dark:text-emerald-400 inline-flex items-center gap-1 text-[10px]"
+              >
+                <i class="pi pi-check-circle text-[10px]"></i>
+                {{ src | translate }}
+              </span>
+            }
+          </fieldset>
+
+          <fieldset
+            class="border-surface-200 dark:border-surface-700/70 flex flex-col gap-1.5 rounded-lg border p-3"
+          >
+            <legend
+              class="px-1.5 text-[11px] font-semibold uppercase tracking-wide text-surface-700 dark:text-surface-200"
+            >
+              {{ 'clinicalScales.gina.criteria.respiratory_rate' | translate }}
+            </legend>
+            <p class="text-surface-500 dark:text-surface-400 text-[11px]">
+              {{ 'clinicalScales.gina.help.respiratoryRate' | translate }}
+            </p>
+            <p-inputNumber
+              formControlName="respiratoryRate"
+              [min]="0"
+              [max]="80"
+              [maxFractionDigits]="0"
+              placeholder="20"
+              suffix=" /min"
+              styleClass="w-full"
+              inputStyleClass="w-full"
+            />
+            @if (rrSource(); as src) {
+              <span
+                class="text-emerald-700 dark:text-emerald-400 inline-flex items-center gap-1 text-[10px]"
+              >
+                <i class="pi pi-check-circle text-[10px]"></i>
+                {{ src | translate }}
+              </span>
+            }
+          </fieldset>
+        </form>
+      }
+
+      <!-- ============= mMRC form ============= -->
+      @if (selectedScale() === 'mmrc') {
+        <form [formGroup]="mmrcForm" class="flex flex-col gap-2">
+          <p
+            class="text-surface-500 dark:text-surface-400 rounded-md bg-indigo-50 dark:bg-indigo-950/30 p-2 text-[11px]"
+          >
+            <i class="pi pi-info-circle mr-1 text-[10px]"></i>
+            {{ 'clinicalScales.mmrc.instructions' | translate }}
+          </p>
+          @for (opt of mmrcOptions; track opt.value) {
+            <button
+              type="button"
+              (click)="mmrcForm.controls.grade.setValue(opt.value)"
+              class="border-surface-200 dark:border-surface-700/70 group flex items-start gap-3 rounded-lg border p-3 text-left transition-colors"
+              [class]="
+                mmrcForm.controls.grade.value === opt.value
+                  ? 'bg-indigo-50 border-indigo-300 dark:bg-indigo-950/30 dark:border-indigo-800'
+                  : 'hover:bg-surface-50 dark:hover:bg-surface-800/40'
+              "
+            >
+              <span
+                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold"
+                [class]="
+                  mmrcForm.controls.grade.value === opt.value
+                    ? 'bg-indigo-500 text-white'
+                    : 'bg-surface-100 text-surface-600 dark:bg-surface-800 dark:text-surface-300'
+                "
+              >
+                {{ opt.value }}
+              </span>
+              <span class="text-surface-700 dark:text-surface-200 text-xs leading-relaxed">
+                {{ opt.labelKey | translate }}
+              </span>
+            </button>
+          }
+        </form>
+      }
+
+      <!-- ============= GOLD form ============= -->
+      @if (selectedScale() === 'gold_stage') {
+        <form [formGroup]="goldForm" class="flex flex-col gap-3">
+          <p
+            class="text-surface-500 dark:text-surface-400 rounded-md bg-indigo-50 dark:bg-indigo-950/30 p-2 text-[11px]"
+          >
+            <i class="pi pi-info-circle mr-1 text-[10px]"></i>
+            {{ 'clinicalScales.gold.instructions' | translate }}
+          </p>
+
+          <fieldset
+            class="border-surface-200 dark:border-surface-700/70 flex flex-col gap-1.5 rounded-lg border p-3"
+          >
+            <legend
+              class="px-1.5 text-[11px] font-semibold uppercase tracking-wide text-surface-700 dark:text-surface-200"
+            >
+              {{ 'clinicalScales.gold.criteria.fev1_pct_predicted' | translate }}
+            </legend>
+            <p class="text-surface-500 dark:text-surface-400 text-[11px]">
+              {{ 'clinicalScales.gold.help.fev1Pct' | translate }}
+            </p>
+            <p-inputNumber
+              formControlName="fev1PctPredicted"
+              [min]="0"
+              [max]="200"
+              [maxFractionDigits]="1"
+              placeholder="65"
+              suffix=" %"
+              styleClass="w-full"
+              inputStyleClass="w-full"
+            />
+          </fieldset>
+
+          <fieldset
+            class="border-surface-200 dark:border-surface-700/70 flex flex-col gap-1.5 rounded-lg border p-3"
+          >
+            <legend
+              class="px-1.5 text-[11px] font-semibold uppercase tracking-wide text-surface-700 dark:text-surface-200"
+            >
+              {{ 'clinicalScales.gold.criteria.fev1_fvc_ratio' | translate }}
+            </legend>
+            <p class="text-surface-500 dark:text-surface-400 text-[11px]">
+              {{ 'clinicalScales.gold.help.fev1Fvc' | translate }}
+            </p>
+            <p-inputNumber
+              formControlName="fev1FvcRatio"
+              [min]="0"
+              [max]="1"
+              [maxFractionDigits]="2"
+              placeholder="0.65"
+              styleClass="w-full"
+              inputStyleClass="w-full"
+            />
+          </fieldset>
+        </form>
+      }
+
+      <!-- Live preview (works for any scale) -->
+      <div
+        class="flex flex-wrap items-center gap-3 rounded-lg border p-3"
+        [class]="severityClass(previewSeverity().key)"
+      >
+        <div class="flex flex-col items-center gap-0.5">
+          <span class="text-[9px] font-medium uppercase tracking-wide opacity-70">
+            {{ 'clinicalScales.preview' | translate }}
+          </span>
+          <span class="text-2xl font-bold leading-none">
+            {{ previewScore() }}<span class="text-sm opacity-50">/{{ previewMax() }}</span>
+          </span>
+        </div>
+        <div class="h-8 w-px bg-current opacity-20"></div>
+        <div class="flex flex-1 flex-col gap-0.5">
+          <div class="flex items-center gap-1.5">
+            <span
+              class="h-1.5 w-1.5 rounded-full"
+              [class]="severityDot(previewSeverity().key)"
+            ></span>
+            <span class="text-xs font-bold uppercase tracking-wide">
+              {{ previewSeverity().labelKey | translate }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <label class="flex flex-col gap-1.5">
+        <span class="text-surface-600 dark:text-surface-300 text-xs font-medium">
+          {{ 'examinations.notes' | translate }}
+        </span>
+        <textarea pTextarea [formControl]="notesCtrl" rows="2"></textarea>
+      </label>
+
+      <p-button
+        type="button"
+        icon="pi pi-save"
+        [label]="'clinicalScales.save' | translate"
+        [loading]="submitting()"
+        [disabled]="!canSubmit()"
+        (onClick)="submit()"
+        styleClass="w-full"
+      />
+    </div>
+  </aside>
+</div>

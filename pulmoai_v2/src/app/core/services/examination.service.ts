@@ -3,6 +3,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 
 import type {
+  ClinicalScaleCreateRequest,
   Examination,
   ExaminationFileCreateRequest,
   ExaminationParametersCreateRequest,
@@ -51,6 +52,18 @@ export class ExaminationService {
 
   createParameters(payload: ExaminationParametersCreateRequest): Observable<Examination> {
     return this.http.post<Examination>('/examinations/parameters', payload).pipe(
+      tap((created) => this._examinations.update((list) => [created, ...list])),
+    );
+  }
+
+  createClinicalScale(payload: ClinicalScaleCreateRequest): Observable<Examination> {
+    const body = {
+      patientId: payload.patientId,
+      scaleType: payload.scaleType,
+      inputs: payload.inputs,
+      notes: payload.notes ?? null,
+    };
+    return this.http.post<Examination>('/examinations/clinical-scale', body).pipe(
       tap((created) => this._examinations.update((list) => [created, ...list])),
     );
   }

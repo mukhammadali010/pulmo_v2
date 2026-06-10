@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Awaitable, Callable, Literal, TypeVar
+from typing import Any, Awaitable, Callable, Literal, TypeVar
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -35,17 +35,21 @@ def gemini_configured(settings: Settings) -> bool:
     return bool(settings.google_api_key)
 
 
-def make_genai_client():
+def make_genai_client(*, force_ai_studio: bool = False):
     """Create a `google-genai` client in either AI Studio or Vertex AI mode.
 
     Vertex mode authenticates through Application Default Credentials and routes
     calls through the configured Google Cloud project, sidestepping the regional
     blocks that the AI Studio endpoint applies to some countries.
+
+    `force_ai_studio` ignores the Vertex setting and builds an AI Studio client
+    from GOOGLE_API_KEY. Used by `generate_with_gemini` to fall back when a
+    Vertex call fails because the GCP project has no billing enabled.
     """
     from google import genai
 
     settings = get_settings()
-    if settings.google_genai_use_vertexai:
+    if settings.google_genai_use_vertexai and not force_ai_studio:
         if not settings.google_cloud_project:
             raise ValueError(
                 "GOOGLE_CLOUD_PROJECT is required when GOOGLE_GENAI_USE_VERTEXAI=true"
@@ -98,6 +102,57 @@ async def call_gemini_with_retry(
             )
             await asyncio.sleep(wait)
             attempt += 1
+
+
+def _is_vertex_billing_error(exc: Exception) -> bool:
+    """Whether a Vertex AI call failed because the GCP project has no billing.
+
+    Vertex returns 403 PERMISSION_DENIED with reason BILLING_DISABLED when the
+    project has no billing account attached. We treat any 403 from Vertex as a
+    signal to fall back to the AI Studio free tier — billing/permission errors
+    are exactly the failures AI Studio (key-based) can recover from.
+    """
+    code = getattr(exc, "code", None)
+    return code == 403
+
+
+async def generate_with_gemini(
+    build_call: Callable[[Any], Awaitable[T]],
+    *,
+    label: str,
+) -> T:
+    """Run a Gemini call with transient-retry and Vertex→AI Studio fallback.
+
+    `build_call` receives a configured genai client and must return the awaitable
+    for the actual `generate_content` call. When the primary client runs in
+    Vertex AI mode and the call fails with a 403 (typically BILLING_DISABLED on
+    the GCP project), we transparently retry through the AI Studio free tier if
+    a GOOGLE_API_KEY is available — so a missing billing account degrades to the
+    free tier instead of surfacing a hard failure to the doctor.
+    """
+    from google.genai.errors import APIError
+
+    settings = get_settings()
+    primary = make_genai_client()
+    try:
+        return await call_gemini_with_retry(lambda: build_call(primary), label=label)
+    except APIError as exc:
+        can_fall_back = (
+            settings.google_genai_use_vertexai
+            and bool(settings.google_api_key)
+            and _is_vertex_billing_error(exc)
+        )
+        if not can_fall_back:
+            raise
+        logger.warning(
+            "Vertex AI %s failed (code=%s); falling back to AI Studio free tier",
+            label,
+            getattr(exc, "code", None),
+        )
+        fallback = make_genai_client(force_ai_studio=True)
+        return await call_gemini_with_retry(
+            lambda: build_call(fallback), label=f"{label}/ai-studio"
+        )
 
 
 class DiagnosisOutput(BaseModel):
@@ -375,6 +430,25 @@ CRITICAL RULES:
   lungs without a dominant lobe. If the inputs do not localize the disease \
   to any specific region, return an empty list.
 
+CLINICAL SCORING SCALES:
+- Some inputs are deterministic clinical scoring scales (e.g. CRB-65, CAT, GINA, mMRC, \
+  GOLD). They are calculator outputs — not AI analyses — and arrive with a fixed \
+  score, severity, and per-criterion breakdown. Treat them as authoritative for what \
+  they measure: do not contradict their score, but DO use them to anchor your \
+  confidence and urgency. Examples:
+  - CRB-65 ≥3 → high mortality risk → urgency at least `yellow`, often `red`.
+  - GOLD 3 or 4 → severe/very-severe COPD → reflect this in primary diagnosis and \
+    differential.
+  - mMRC 3-4 → severe dyspnea → factor into urgency and recommended next steps.
+  - CAT >20 → high COPD impact on quality of life — mention in recommendations.
+- Cite scales in the report using the `[scale: NAME]` tag (e.g. \
+  "[scale: GOLD]", "[scale: CRB-65]") just like other modalities.
+- If a scale's `recommendation` field is provided, weave the substance of it into \
+  your "Recommended next steps" rather than ignoring it. The doctor is relying on \
+  these scales as established clinical decision tools.
+- A clinical scale with severity `high` should generally raise the overall \
+  `confidence` to at least `moderate` for the matched primary diagnosis.
+
 Structure the `report_markdown` field as Markdown with these sections:
 
 ## Final diagnosis
@@ -393,7 +467,13 @@ Low / moderate / high + the reasoning that justifies that level.
 Green / yellow / red + the reasoning.
 
 ## Recommended next steps
-Concrete next actions, ordered by priority.
+Concrete next actions, ordered by priority. If a clinical scale provided a \
+recommendation (e.g. CRB-65, GOLD), incorporate its substance here.
+
+## Clinical scales
+If any clinical scoring scales were provided, list them with score, severity, \
+and how the score informs your conclusion. Omit this section entirely if no \
+scales were provided.
 
 ## Affected regions
 Brief enumeration of the lung regions implicated and the modality that supports each. \

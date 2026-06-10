@@ -53,9 +53,18 @@ const SEVERITY_COLOR: Record<SeverityLevel, number> = {
   severe: 0xef4444,
 };
 
-/** Healthy-lung tint applied when a lobe is not affected. */
-const UNAFFECTED_COLOR_LIGHT = 0xfecaca; // rose-200
-const UNAFFECTED_COLOR_DARK = 0x9f4a4a;
+/** Halo opacity per severity at the centroid (peak). Falloff is squared so
+ * the saturated paint-cloud core fades smoothly into adjacent regions. */
+const SEVERITY_HALO_OPACITY: Record<SeverityLevel, number> = {
+  mild: 0.85,
+  moderate: 1.0,
+  severe: 1.0,
+};
+
+/** Healthy-lung tint applied when a lobe is not affected. Light/dark variants
+ * are picked at paint time based on the `app-dark` class on <html>. */
+const UNAFFECTED_COLOR_LIGHT = 0xd1fae5; // emerald-100 (paler so paint dominates)
+const UNAFFECTED_COLOR_DARK = 0x14532d; // emerald-900
 
 @Component({
   selector: 'app-lung-diagram',
@@ -83,6 +92,12 @@ export class LungDiagram implements AfterViewInit, OnDestroy {
   private animationId: number | null = null;
   private resizeObserver?: ResizeObserver;
   private readonly lobeMeshes = new Map<LobeRegion, THREE.Mesh>();
+  /** Soft halo sphere per lobe — drives the "diffuse fog" overlay. The lobe
+   * mesh keeps the healthy green tint; the halo on top conveys severity with
+   * a radial-alpha falloff so adjacent affected lobes blend visually. */
+  private readonly lobeHalos = new Map<LobeRegion, THREE.Mesh>();
+  private readonly lobeHaloMaterials = new Map<LobeRegion, THREE.ShaderMaterial>();
+  private haloGeometry?: THREE.SphereGeometry;
   /** Outer group: applies world rotation/scale around scene origin. */
   private readonly lungGroup = new THREE.Group();
   /** Inner group: holds the meshes; we translate this so the model's centroid
@@ -98,6 +113,26 @@ export class LungDiagram implements AfterViewInit, OnDestroy {
   protected readonly bilateralSeverity = computed<SeverityLevel | null>(() => {
     const r = this.regions().find((x) => x.region === 'bilateral');
     return r?.severity ?? null;
+  });
+
+  /** Severity level used to tint lobes that have no direct finding. We treat
+   * `bilateral`, `airways`, `pleural`, and `mediastinal` as "whole-lung"
+   * findings — the side panel still shows the precise region, but the 3D
+   * model can't render airways or pleura as discrete meshes, so failing to
+   * tint anything for those findings looks like a healthy lung to the doctor.
+   * Worst-of severity wins so a severe airway obstruction lights up red. */
+  protected readonly globalSeverity = computed<SeverityLevel | null>(() => {
+    const globalRegionTypes: LobeRegion[] = [
+      'bilateral',
+      'airways',
+      'pleural',
+      'mediastinal',
+    ];
+    const sevs = this.regions()
+      .filter((r) => globalRegionTypes.includes(r.region))
+      .map((r) => r.severity);
+    if (sevs.length === 0) return null;
+    return this.maxSeverity(sevs);
   });
 
   protected readonly findingsByRegion = computed<Map<LobeRegion, AffectedRegion[]>>(() => {
@@ -123,6 +158,7 @@ export class LungDiagram implements AfterViewInit, OnDestroy {
     effect(() => {
       this.regions();
       this.bilateralSeverity();
+      this.globalSeverity();
       this.applyLobeMaterials();
     });
   }
@@ -143,6 +179,10 @@ export class LungDiagram implements AfterViewInit, OnDestroy {
       (mesh.material as THREE.Material).dispose();
     });
     this.lobeMeshes.clear();
+    this.lobeHaloMaterials.forEach((mat) => mat.dispose());
+    this.lobeHaloMaterials.clear();
+    this.lobeHalos.clear();
+    this.haloGeometry?.dispose();
     this.renderer?.dispose();
   }
 
@@ -226,13 +266,78 @@ export class LungDiagram implements AfterViewInit, OnDestroy {
           roughness: 0.55,
           metalness: 0.05,
           transparent: true,
-          opacity: 0.92,
+          opacity: 0.85,
           side: THREE.DoubleSide,
         });
         const mesh = new THREE.Mesh(geom, mat);
         mesh.userData['lobe'] = lobe;
         this.lungInner.add(mesh);
         this.lobeMeshes.set(lobe, mesh);
+      });
+
+      // Build per-lobe halo overlays. Each halo is a sphere centered on the
+      // lobe's bounding-box centroid with a radial-alpha shader so the
+      // strongest color is at the centroid and softly fades at the lobe edge,
+      // bleeding into adjacent regions. This produces the diffuse "fog"
+      // appearance the doctor expects when findings are not sharply
+      // delimited (e.g. interstitial disease).
+      this.haloGeometry = new THREE.SphereGeometry(1, 32, 32);
+      lobeEntries.forEach(({ lobe }, i) => {
+        const geom = geometries[i];
+        const lobeBox = geom.boundingBox ?? new THREE.Box3().setFromBufferAttribute(
+          geom.getAttribute('position') as THREE.BufferAttribute,
+        );
+        const center = new THREE.Vector3();
+        const size = new THREE.Vector3();
+        lobeBox.getCenter(center);
+        lobeBox.getSize(size);
+
+        const haloMat = new THREE.ShaderMaterial({
+          uniforms: {
+            uColor: { value: new THREE.Color(0xffffff) },
+            uOpacity: { value: 0 },
+          },
+          vertexShader: /* glsl */ `
+            varying vec3 vLocal;
+            void main() {
+              vLocal = position;
+              gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+          `,
+          // Radial alpha: peak at the centroid, smooth falloff to zero at the
+          // sphere edge. NB: GLSL smoothstep(edge0, edge1, x) requires
+          // edge0 < edge1 — using (0.0, 1.0) and inverting gives a defined
+          // result, unlike (1.0, 0.0) which is undefined and reads as black
+          // on most drivers. The squared falloff keeps a saturated core and
+          // a long, painterly fade — the paint-cloud look the doctor expects
+          // for diffuse disease.
+          fragmentShader: /* glsl */ `
+            uniform vec3 uColor;
+            uniform float uOpacity;
+            varying vec3 vLocal;
+            void main() {
+              float d = clamp(length(vLocal), 0.0, 1.0);
+              float t = 1.0 - smoothstep(0.0, 1.0, d);
+              float a = t * t * uOpacity;
+              gl_FragColor = vec4(uColor, a);
+            }
+          `,
+          transparent: true,
+          depthWrite: false,
+          blending: THREE.NormalBlending,
+          side: THREE.DoubleSide,
+        });
+
+        const halo = new THREE.Mesh(this.haloGeometry!, haloMat);
+        halo.position.copy(center);
+        // Cover the lobe and bleed past its boundary so adjacent affected
+        // lobes blend visually instead of meeting at a hard line.
+        const radius = Math.max(size.x, size.y, size.z) * 0.95;
+        halo.scale.setScalar(radius);
+        halo.renderOrder = 2; // draw after the opaque lobe meshes
+        this.lungInner.add(halo);
+        this.lobeHalos.set(lobe, halo);
+        this.lobeHaloMaterials.set(lobe, haloMat);
       });
 
       // Center the model around (0,0,0) in inner-group local coords by
@@ -300,19 +405,34 @@ export class LungDiagram implements AfterViewInit, OnDestroy {
       if (!mesh) continue;
       const mat = mesh.material as THREE.MeshStandardMaterial;
       const sev = this.severityFor(lobe);
+      // Lobe mesh stays a soft healthy green; the halo overlay carries the
+      // severity signal. We only nudge the lobe with a faint emissive tint
+      // so the affected lobe still reads as "warm" even when viewed from
+      // an angle that hides the halo.
+      mat.color.setHex(baseColor);
       if (sev) {
-        const color = SEVERITY_COLOR[sev];
-        mat.color.setHex(color);
-        mat.emissive.setHex(color);
-        mat.emissiveIntensity = sev === 'severe' ? 0.4 : sev === 'moderate' ? 0.25 : 0.15;
-        mat.opacity = 0.95;
+        // Lobe mesh keeps a faint severity tint so the affected region
+        // reads as "warm" even from angles where the halo is occluded.
+        mat.emissive.setHex(SEVERITY_COLOR[sev]);
+        mat.emissiveIntensity = sev === 'severe' ? 0.45 : sev === 'moderate' ? 0.32 : 0.2;
+        mat.opacity = 0.85;
       } else {
-        mat.color.setHex(baseColor);
         mat.emissive.setHex(0x000000);
         mat.emissiveIntensity = 0;
-        mat.opacity = 0.85;
+        mat.opacity = 0.8;
       }
       mat.needsUpdate = true;
+
+      // Halo: this is what creates the soft fog over the affected region.
+      const haloMat = this.lobeHaloMaterials.get(lobe);
+      if (haloMat) {
+        if (sev) {
+          (haloMat.uniforms['uColor'].value as THREE.Color).setHex(SEVERITY_COLOR[sev]);
+          haloMat.uniforms['uOpacity'].value = SEVERITY_HALO_OPACITY[sev];
+        } else {
+          haloMat.uniforms['uOpacity'].value = 0;
+        }
+      }
     }
   }
 
@@ -323,7 +443,11 @@ export class LungDiagram implements AfterViewInit, OnDestroy {
     if (direct && direct.length > 0) {
       return this.maxSeverity(direct.map((r) => r.severity));
     }
-    return this.bilateralSeverity();
+    // Fall through to whole-lung findings (bilateral / airways / pleural /
+    // mediastinal). These don't map to a single lobe, so we tint all lobes
+    // with the worst severity among them — the side panel still names which
+    // specific region was reported.
+    return this.globalSeverity();
   }
 
   protected severityChipClass(severity: SeverityLevel): string {

@@ -77,7 +77,26 @@
                         · {{ exam.createdAt | date: 'mediumDate' }}
                       </span>
                     </div>
-                    @if (exam.aiSummary) {
+                    @if (scalePreview(exam); as sp) {
+                      <div class="flex flex-wrap items-center gap-2">
+                        <span
+                          class="text-surface-700 dark:text-surface-200 text-xs font-medium"
+                        >
+                          {{ sp.title }}
+                        </span>
+                        <span
+                          class="bg-surface-100 dark:bg-surface-800 text-surface-700 dark:text-surface-200 rounded-md px-2 py-0.5 font-mono text-[11px] font-semibold"
+                        >
+                          {{ sp.score }}
+                        </span>
+                        <span
+                          class="rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
+                          [class]="scaleSeverityClass(exam)"
+                        >
+                          {{ sp.severity }}
+                        </span>
+                      </div>
+                    } @else if (exam.aiSummary) {
                       <p class="text-surface-600 dark:text-surface-300 text-xs line-clamp-2">
                         {{ exam.aiSummary }}
                       </p>

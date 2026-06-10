@@ -63,18 +63,21 @@ export class ExaminationList implements OnInit {
   protected typeLabelKey(type: ExaminationType): string {
     if (type === 'audio') return 'examinations.audioDiagnostic';
     if (type === 'parameters') return 'examinations.parameterDiagnostic';
+    if (type === 'clinical_scale') return 'clinicalScales.tabTitle';
     return 'examType.' + type;
   }
 
   protected typeIcon(type: ExaminationType): string {
     if (type === 'audio') return 'pi-microphone';
     if (type === 'parameters') return 'pi-chart-line';
+    if (type === 'clinical_scale') return 'pi-calculator';
     return 'pi-image';
   }
 
   protected typeAccent(type: ExaminationType): string {
     if (type === 'audio') return 'from-violet-500 to-fuchsia-500';
     if (type === 'parameters') return 'from-amber-500 to-orange-500';
+    if (type === 'clinical_scale') return 'from-indigo-500 to-violet-500';
     if (type === 'ct') return 'from-indigo-500 to-blue-500';
     if (type === 'mri') return 'from-teal-500 to-emerald-500';
     return 'from-sky-500 to-cyan-500';

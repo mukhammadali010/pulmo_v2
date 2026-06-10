@@ -25,12 +25,16 @@
       }
     </div>
 
-    <span class="text-surface-400 dark:text-surface-500 text-[10px] leading-tight">
+    <!-- <span class="text-surface-400 dark:text-surface-500 text-[10px] leading-tight">
       Model: BodyParts3D, © 2008 Life Science Integrated Database Center · CC BY-SA 2.1 JP
-    </span>
+    </span> -->
 
     <!-- Severity legend -->
     <div class="text-surface-500 dark:text-surface-400 flex flex-wrap items-center gap-3 text-[11px]">
+      <span class="flex items-center gap-1.5">
+        <span class="h-2.5 w-2.5 rounded-sm" style="background:#22c55e"></span>
+        {{ 'finalDiagnosis.lungDiagram.severity.healthy' | translate }}
+      </span>
       <span class="flex items-center gap-1.5">
         <span class="h-2.5 w-2.5 rounded-sm" style="background:#facc15"></span>
         {{ 'finalDiagnosis.lungDiagram.severity.mild' | translate }}

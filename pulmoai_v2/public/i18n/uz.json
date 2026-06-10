@@ -10,6 +10,8 @@
     "searchPlaceholder": "Qidirish...",
     "loading": "Yuklanmoqda...",
     "all": "Barchasi",
+    "yes": "Ha",
+    "no": "Yo'q",
     "toggleSidebar": "Yon panelni almashtirish"
   },
   "theme": {
@@ -252,6 +254,7 @@
       "rotateHint": "Sichqoncha bilan aylantiring",
       "loading": "3D model yuklanmoqda...",
       "severity": {
+        "healthy": "Sog'lom",
         "mild": "Yengil",
         "moderate": "O'rtacha",
         "severe": "Og'ir"
@@ -310,5 +313,166 @@
     "previousValue": "Oldingi",
     "latestValue": "Oxirgi",
     "delta": "O'zgarish"
+  },
+  "clinicalScales": {
+    "tabTitle": "Klinik shkalalar",
+    "save": "Hisoblash va saqlash",
+    "saved": "Shkala saqlandi",
+    "totalScore": "Jami ball",
+    "preview": "Ko'rinish",
+    "breakdown": "Mezonlar bo'yicha taqsimlash",
+    "reference": "Manba",
+    "notMeasured": "o'lchanmagan",
+    "empty": {
+      "title": "Hali shkala hisoblanmagan",
+      "description": "O'ng tomondagi kalkulyator orqali bemor uchun klinik baho ballarini hisoblang."
+    },
+    "severity": {
+      "low": "Past xavf",
+      "moderate": "O'rtacha xavf",
+      "high": "Yuqori xavf"
+    },
+    "source": {
+      "fromPatient": "Bemor profilidan avtomatik",
+      "lastParameters": "Oxirgi parametrlar tashxisidan to'ldirildi"
+    },
+    "crb65": {
+      "title": "CRB-65",
+      "short": "CRB-65",
+      "subtitle": "Pnevmoniya og'irligi shkalasi",
+      "description": "Jamiyatda olingan pnevmoniya bilan kasallangan bemorda 30 kunlik o'lim xavfini aniqlab, statsionar yoki uy davolanishi to'g'risida qaror qabul qilishga yordam beradi.",
+      "interpretation": "Ballarni qanday talqin qilish kerak?",
+      "interpretation0": "Past xavf — uy sharoitida davolanish mumkin",
+      "interpretation1_2": "O'rtacha xavf — statsionar davolanishni ko'rib chiqish",
+      "interpretation3_4": "Yuqori xavf — shoshilinch statsionar / ICU mulohazasi",
+      "systolic": "Sistolik",
+      "diastolic": "Diastolik",
+      "noDateOfBirth": "Tug'ilgan kun ko'rsatilmagan",
+      "criteria": {
+        "confusion": "Es-hush buzilishi",
+        "respiratory_rate": "Nafas chastotasi",
+        "blood_pressure": "Qon bosimi",
+        "age": "Yosh"
+      },
+      "help": {
+        "confusion": "Bemorda yangi disorientatsiya, vaqt/joy haqida noto'g'ri javob, yoki AMTS ≤ 8 bo'lsa — \"Ha\". 1 ball.",
+        "respiratoryRate": "≥ 30 nafas/min bo'lsa 1 ball. Quyida bo'lsa 0 ball.",
+        "bloodPressure": "Sistolik < 90 mmHg yoki diastolik ≤ 60 mmHg bo'lsa 1 ball. Ikkalasi ham past bo'lsa ham — 1 ball (qo'shilmaydi).",
+        "age": "Bemor yoshi 65 va undan katta bo'lsa 1 ball. Yosh bemor profilidan avtomatik olinadi."
+      }
+    },
+    "cat": {
+      "title": "CAT — COPD baholash testi",
+      "short": "CAT",
+      "subtitle": "COPD ning hayot sifatiga ta'siri (8 savol)",
+      "description": "Bemorga 8 ta savol berib, har birini 0 (eng yaxshi) dan 5 (eng yomon) ballgacha baholaydi. Yig'indi ball COPD ning kunlik hayotga umumiy ta'sirini ko'rsatadi.",
+      "instructions": "Har bir savol uchun 0 dan 5 gacha tugmalardan birini tanlang — bemor bu simptomni qanchalik kuchli his qilyapti.",
+      "severity": {
+        "low": "Past ta'sir",
+        "medium": "O'rtacha ta'sir",
+        "high": "Yuqori ta'sir",
+        "veryHigh": "Juda yuqori ta'sir"
+      },
+      "scale": {
+        "0": "0 — yo'q",
+        "1": "1",
+        "2": "2",
+        "3": "3",
+        "4": "4",
+        "5": "5 — eng kuchli"
+      },
+      "q": {
+        "cough": "Yo'tal",
+        "cough_low": "Hech qachon yo'talmayman",
+        "cough_high": "Doim yo'talayapman",
+        "phlegm": "Balg'am",
+        "phlegm_low": "Ko'kragimda balg'am yo'q",
+        "phlegm_high": "Ko'kragim balg'amga to'la",
+        "chestTightness": "Ko'krakda siqilish",
+        "chestTightness_low": "Ko'kragimda siqilish yo'q",
+        "chestTightness_high": "Ko'kragim juda siqilgan",
+        "breathlessness": "Zinaga chiqishda hansirash",
+        "breathlessness_low": "Yo'qotilmayman",
+        "breathlessness_high": "Juda hansirayman",
+        "activityLimitation": "Uydagi faollik cheklovi",
+        "activityLimitation_low": "Hech qanday cheklov yo'q",
+        "activityLimitation_high": "Juda cheklangan",
+        "confidence": "Uydan chiqishga ishonch",
+        "confidence_low": "Bemalol uydan chiqaman",
+        "confidence_high": "Uydan chiqolmayman",
+        "sleep": "Uyqu",
+        "sleep_low": "Yaxshi uxlayman",
+        "sleep_high": "Yaxshi uxlolmayman",
+        "energy": "Quvvat",
+        "energy_low": "Quvvatga to'laman",
+        "energy_high": "Quvvatim umuman yo'q"
+      }
+    },
+    "gina": {
+      "title": "GINA — BA hujumi og'irligi",
+      "short": "GINA",
+      "subtitle": "Bronxial astma hujumini tasniflash (GINA 2009)",
+      "description": "Pulse, PEF (% personal best), SaO2 va nafas chastotasi asosida BA hujumi og'irligini aniqlaydi. Eng og'ir parametr asosida tasniflanadi.",
+      "instructions": "Mavjud parametrlarni kiriting — kamida bittasi yetarli. Tasniflash eng og'ir parametr bo'yicha bo'ladi.",
+      "severity": {
+        "unknown": "Aniqlanmagan",
+        "mild": "Engil hujum",
+        "moderate": "O'rta hujum",
+        "severe": "Og'ir hujum"
+      },
+      "criteria": {
+        "pulse": "Pulse",
+        "pef_pct": "PEF (% personal best)",
+        "sao2": "SaO₂",
+        "respiratory_rate": "Nafas chastotasi"
+      },
+      "help": {
+        "pulse": "<100 — engil, 100-120 — o'rta, >120 — og'ir",
+        "pefPct": "Bemorning shaxsiy eng yaxshi PEF qiymatining foizi. >80% — engil, 60-80% — o'rta, <60% — og'ir.",
+        "sao2": ">95% — engil, 91-95% — o'rta, <90% — og'ir",
+        "respiratoryRate": ">30/min — og'ir; pasayganida — engil/o'rta"
+      }
+    },
+    "mmrc": {
+      "title": "mMRC — Hansirash shkalasi",
+      "short": "mMRC",
+      "subtitle": "Modified Medical Research Council Dyspnea",
+      "description": "Bemorda hansirashning kunlik faoliyatga ta'siri — 5 daraja (0-4). Bemorga eng mos keladigan tavsifni tanlang.",
+      "instructions": "Bemorning hansirashi qaysi darajaga eng mos keladi — shuni tanlang.",
+      "severity": {
+        "mild": "Yengil",
+        "moderate": "O'rtacha",
+        "severe": "Og'ir"
+      },
+      "grades": {
+        "0": "0 — Faqat og'ir jismoniy yuk paytida hansirash",
+        "1": "1 — Tez yurishda yoki balandlikka chiqishda hansirash",
+        "2": "2 — Tengdoshlardan sekinroq yurish, yoki tinch yurishda nafas olish uchun to'xtash",
+        "3": "3 — 100 m yurgandan keyin yoki bir necha daqiqada to'xtash",
+        "4": "4 — Uydan chiqolmaslik yoki kiyim kiyishda hansirash"
+      }
+    },
+    "gold": {
+      "title": "GOLD — COPD bosqichi",
+      "short": "GOLD",
+      "subtitle": "Spirometrik bosqich (FEV₁ % predicted)",
+      "description": "Post-bronchodilator FEV₁ % predicted bo'yicha COPD bosqichini aniqlaydi. COPD diagnozi uchun FEV₁/FVC < 0.70 talab qilinadi.",
+      "instructions": "Post-bronchodilator FEV₁ qiymatini % predicted shaklida kiriting. FEV₁/FVC nisbatini ham (ixtiyoriy) ko'rsating — agar 0.70 dan katta bo'lsa, COPD tasdiqlanmaydi.",
+      "severity": {
+        "unknown": "Aniqlanmagan",
+        "gold1": "GOLD 1 — Yengil",
+        "gold2": "GOLD 2 — O'rtacha",
+        "gold3": "GOLD 3 — Og'ir",
+        "gold4": "GOLD 4 — Juda og'ir"
+      },
+      "criteria": {
+        "fev1_pct_predicted": "FEV₁ % predicted",
+        "fev1_fvc_ratio": "FEV₁/FVC nisbati"
+      },
+      "help": {
+        "fev1Pct": "GOLD 1 ≥80%, GOLD 2 50-79%, GOLD 3 30-49%, GOLD 4 <30%. Post-bronchodilator qiymatini ishlating.",
+        "fev1Fvc": "0.70 dan past bo'lsa COPD tasdiqlanadi. Ixtiyoriy lekin tavsiya etiladi."
+      }
+    }
   }
 }

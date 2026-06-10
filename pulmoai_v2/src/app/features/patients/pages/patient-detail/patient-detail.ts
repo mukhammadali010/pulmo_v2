@@ -11,6 +11,7 @@ import { ExaminationService } from '@core/services/examination.service';
 import { FinalDiagnosisService } from '@core/services/final-diagnosis.service';
 import { PatientService } from '@core/services/patient.service';
 import { AudioDiagnostic } from '../../components/audio-diagnostic/audio-diagnostic';
+import { ClinicalScales } from '../../components/clinical-scales/clinical-scales';
 import { ImageDiagnostic } from '../../components/image-diagnostic/image-diagnostic';
 import { ParameterDiagnostic } from '../../components/parameter-diagnostic/parameter-diagnostic';
 import { ResultsTimeline } from '../../components/results-timeline/results-timeline';
@@ -26,6 +27,7 @@ const POLL_INTERVAL_MS = 3000;
     ButtonModule,
     TabsModule,
     AudioDiagnostic,
+    ClinicalScales,
     ImageDiagnostic,
     ParameterDiagnostic,
     ResultsTimeline,
@@ -55,6 +57,19 @@ export class PatientDetail implements OnInit, OnDestroy {
   protected readonly parameters = computed(() =>
     this.examinations().filter((e) => e.type === 'parameters'),
   );
+  protected readonly clinicalScales = computed(() =>
+    this.examinations().filter((e) => e.type === 'clinical_scale'),
+  );
+
+  /** Latest parameters examination — used to pre-fill respiratoryRate in the
+   * CRB-65 calculator so the doctor doesn't have to re-enter it. */
+  protected readonly latestParametersExam = computed(() => {
+    const list = this.parameters();
+    if (list.length === 0) return null;
+    return [...list].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    )[0];
+  });
 
   private readonly analyzingIds = computed(() =>
     this.examinations()

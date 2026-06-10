@@ -57,11 +57,15 @@ export class FinalDiagnosisCreate implements OnInit {
     { value: 'en', labelKey: 'language.en' },
   ];
 
-  /** Only `done` examinations are eligible — synthesis needs the AI report. */
+  /** Only `done` examinations are eligible. Imaging/audio/parameters require an
+   * AI report; clinical_scale examinations are deterministic so their stored
+   * `parameters` payload (score, severity, breakdown) is the authoritative input. */
   protected readonly eligibleExaminations = computed<Examination[]>(() =>
     this.examinationService
       .examinations()
-      .filter((e) => e.status === 'done' && !!e.aiReport),
+      .filter(
+        (e) => e.status === 'done' && (!!e.aiReport || e.type === 'clinical_scale'),
+      ),
   );
 
   protected readonly selectedCount = computed(() => this.selectedIds().size);
@@ -110,13 +114,52 @@ export class FinalDiagnosisCreate implements OnInit {
   protected typeLabelKey(type: ExaminationType): string {
     if (type === 'audio') return 'examinations.audioDiagnostic';
     if (type === 'parameters') return 'examinations.parameterDiagnostic';
+    if (type === 'clinical_scale') return 'clinicalScales.tabTitle';
     return 'examType.' + type;
   }
 
   protected typeIcon(type: ExaminationType): string {
     if (type === 'audio') return 'pi-microphone';
     if (type === 'parameters') return 'pi-chart-line';
+    if (type === 'clinical_scale') return 'pi-calculator';
     return 'pi-image';
+  }
+
+  /** For clinical_scale exams the row preview can't quote ai_summary (none).
+   * Project the structured result instead. Returns null for non-scale exams. */
+  protected scalePreview(
+    exam: Examination,
+  ): { title: string; score: string; severity: string } | null {
+    if (exam.type !== 'clinical_scale' || !exam.parameters) return null;
+    const p = exam.parameters as Record<string, unknown>;
+    const scaleType = String(p['scaleType'] ?? '');
+    const titleKey = this.scaleTitleKey(scaleType);
+    const score = `${p['score'] ?? '?'}/${p['scoreMax'] ?? '?'}`;
+    return {
+      title: this.translate.instant(titleKey),
+      score,
+      severity: String(p['severityLabel'] ?? p['severity'] ?? ''),
+    };
+  }
+
+  protected scaleSeverityClass(exam: Examination): string {
+    const sev = (exam.parameters as Record<string, unknown> | null)?.['severity'];
+    if (sev === 'low')
+      return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300';
+    if (sev === 'moderate')
+      return 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300';
+    if (sev === 'high')
+      return 'bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-300';
+    return 'bg-surface-100 text-surface-600';
+  }
+
+  private scaleTitleKey(scaleType: string): string {
+    if (scaleType === 'crb_65') return 'clinicalScales.crb65.title';
+    if (scaleType === 'cat') return 'clinicalScales.cat.title';
+    if (scaleType === 'gina_severity') return 'clinicalScales.gina.title';
+    if (scaleType === 'mmrc') return 'clinicalScales.mmrc.title';
+    if (scaleType === 'gold_stage') return 'clinicalScales.gold.title';
+    return 'clinicalScales.tabTitle';
   }
 
   protected submit(): void {

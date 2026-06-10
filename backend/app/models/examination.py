@@ -19,6 +19,7 @@ class ExaminationType(StrEnum):
     MRI = "mri"
     AUDIO = "audio"
     PARAMETERS = "parameters"
+    CLINICAL_SCALE = "clinical_scale"
 
 
 class ExaminationStatus(StrEnum):

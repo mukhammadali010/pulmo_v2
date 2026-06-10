@@ -5,11 +5,13 @@ from fastapi import APIRouter, BackgroundTasks, File, Form, HTTPException, Uploa
 from app.api.deps import CurrentUser, SessionDep
 from app.models.examination import ExaminationStatus, ExaminationType
 from app.schemas.examination import (
+    ClinicalScaleCreate,
     ExaminationRead,
     ExaminationUpdate,
     ParameterExaminationCreate,
 )
 from app.services import ai_diagnosis
+from app.services import clinical_scales as clinical_scales_service
 from app.services import examination as examination_service
 from app.services import patient as patient_service
 from app.services.storage import (
@@ -100,6 +102,44 @@ async def create_parameter_examination(
         owner_id=current_user.id,
         patient_id=payload.patient_id,
         parameters=payload.parameters,
+        notes=payload.notes,
+    )
+    return ExaminationRead.model_validate(examination)
+
+
+@router.post(
+    "/clinical-scale",
+    response_model=ExaminationRead,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_clinical_scale(
+    payload: ClinicalScaleCreate,
+    session: SessionDep,
+    current_user: CurrentUser,
+) -> ExaminationRead:
+    """Compute a clinical scale (CRB-65, CAT, GINA, mMRC, GOLD) and persist it.
+
+    Server runs the deterministic calculator — frontend cannot supply a
+    pre-computed score. The result (score, severity, breakdown, recommendation)
+    is stored in `examination.parameters` so the existing examination listing
+    surfaces it without further changes.
+    """
+    patient = await patient_service.get_patient(
+        session, patient_id=payload.patient_id, owner_id=current_user.id
+    )
+    if patient is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found")
+
+    try:
+        result = clinical_scales_service.calculate(payload.scale_type, payload.inputs)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from e
+
+    examination = await examination_service.create_clinical_scale_examination(
+        session,
+        owner_id=current_user.id,
+        patient_id=payload.patient_id,
+        result=dict(result),
         notes=payload.notes,
     )
     return ExaminationRead.model_validate(examination)

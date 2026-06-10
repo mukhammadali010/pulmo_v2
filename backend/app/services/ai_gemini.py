@@ -10,7 +10,6 @@ import json
 import logging
 from uuid import UUID
 
-from google import genai
 from google.genai import types as genai_types
 
 from app.config import get_settings
@@ -21,10 +20,9 @@ from app.services.ai_common import (
     SYSTEM_PROMPT_IMAGE,
     SYSTEM_PROMPT_PARAMS,
     DiagnosisOutput,
-    call_gemini_with_retry,
+    generate_with_gemini,
     language_instruction,
     load_examination,
-    make_genai_client,
     patient_context,
 )
 from app.services.storage import examination_file_path
@@ -54,7 +52,6 @@ GEMINI_AUDIO_MIME_MAP = {
 
 async def analyze_examination(examination_id: UUID, language: str = "uz") -> None:
     settings = get_settings()
-    client = make_genai_client()
 
     async with AsyncSessionLocal() as session:
         examination = await load_examination(session, examination_id)
@@ -69,15 +66,15 @@ async def analyze_examination(examination_id: UUID, language: str = "uz") -> Non
                 ExaminationType.MRI,
             ):
                 output = await _analyze_image(
-                    client, settings.gemini_model, examination, language
+                    settings.gemini_model, examination, language
                 )
             elif examination.type == ExaminationType.PARAMETERS:
                 output = await _analyze_parameters(
-                    client, settings.gemini_model, examination, language
+                    settings.gemini_model, examination, language
                 )
             elif examination.type == ExaminationType.AUDIO:
                 output = await _analyze_audio(
-                    client, settings.gemini_model, examination, language
+                    settings.gemini_model, examination, language
                 )
             else:
                 raise ValueError(f"Unsupported examination type: {examination.type}")
@@ -95,7 +92,7 @@ async def analyze_examination(examination_id: UUID, language: str = "uz") -> Non
 
 
 async def _analyze_image(
-    client: genai.Client, model: str, examination: Examination, language: str
+    model: str, examination: Examination, language: str
 ) -> DiagnosisOutput:
     if not examination.attachment_filename or not examination.attachment_mime:
         raise ValueError("Image examination has no attachment")
@@ -125,8 +122,8 @@ async def _analyze_image(
         f"Please analyze this image.\n\n{language_instruction(language)}"
     )
 
-    response = await call_gemini_with_retry(
-        lambda: client.aio.models.generate_content(
+    response = await generate_with_gemini(
+        lambda c: c.aio.models.generate_content(
             model=model,
             contents=[image_part, user_text],
             config=_json_config(SYSTEM_PROMPT_IMAGE, MAX_TOKENS),
@@ -138,7 +135,7 @@ async def _analyze_image(
 
 
 async def _analyze_parameters(
-    client: genai.Client, model: str, examination: Examination, language: str
+    model: str, examination: Examination, language: str
 ) -> DiagnosisOutput:
     if not examination.parameters:
         raise ValueError("Parameter examination has no parameters")
@@ -152,8 +149,8 @@ async def _analyze_parameters(
         f"Please interpret these values.\n\n{language_instruction(language)}"
     )
 
-    response = await call_gemini_with_retry(
-        lambda: client.aio.models.generate_content(
+    response = await generate_with_gemini(
+        lambda c: c.aio.models.generate_content(
             model=model,
             contents=user_text,
             config=_json_config(SYSTEM_PROMPT_PARAMS, MAX_TOKENS),
@@ -165,7 +162,7 @@ async def _analyze_parameters(
 
 
 async def _analyze_audio(
-    client: genai.Client, model: str, examination: Examination, language: str
+    model: str, examination: Examination, language: str
 ) -> DiagnosisOutput:
     if not examination.attachment_filename or not examination.attachment_mime:
         raise ValueError("Audio examination has no attachment")
@@ -193,8 +190,8 @@ async def _analyze_audio(
         f"{language_instruction(language)}"
     )
 
-    response = await call_gemini_with_retry(
-        lambda: client.aio.models.generate_content(
+    response = await generate_with_gemini(
+        lambda c: c.aio.models.generate_content(
             model=model,
             contents=[audio_part, user_text],
             config=_json_config(SYSTEM_PROMPT_AUDIO, MAX_TOKENS),

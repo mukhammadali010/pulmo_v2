@@ -127,12 +127,14 @@ export class Home implements OnInit {
   protected typeLabelKey(type: ExaminationType): string {
     if (type === 'audio') return 'examinations.audioDiagnostic';
     if (type === 'parameters') return 'examinations.parameterDiagnostic';
+    if (type === 'clinical_scale') return 'clinicalScales.tabTitle';
     return 'examType.' + type;
   }
 
   protected typeIcon(type: ExaminationType): string {
     if (type === 'audio') return 'pi-microphone';
     if (type === 'parameters') return 'pi-chart-line';
+    if (type === 'clinical_scale') return 'pi-calculator';
     return 'pi-image';
   }
 

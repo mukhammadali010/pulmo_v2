@@ -123,6 +123,17 @@
             </span>
           }
         </p-tab>
+        <p-tab value="scales">
+          <i class="pi pi-calculator mr-2"></i>
+          {{ 'clinicalScales.tabTitle' | translate }}
+          @if (clinicalScales().length > 0) {
+            <span
+              class="bg-primary-100 text-primary-700 dark:bg-primary-950/50 dark:text-primary-300 ml-2 rounded-full px-2 py-0.5 text-xs font-medium"
+            >
+              {{ clinicalScales().length }}
+            </span>
+          }
+        </p-tab>
         <p-tab value="results">
           <i class="pi pi-history mr-2"></i>
           {{ 'examinations.results' | translate }}
@@ -149,6 +160,14 @@
         </p-tabpanel>
         <p-tabpanel value="parameters">
           <app-parameter-diagnostic [patientId]="p.id" [examinations]="parameters()" />
+        </p-tabpanel>
+        <p-tabpanel value="scales">
+          <app-clinical-scales
+            [patientId]="p.id"
+            [examinations]="clinicalScales()"
+            [patientAge]="age()"
+            [latestParameters]="latestParametersExam()"
+          />
         </p-tabpanel>
         <p-tabpanel value="results">
           <app-results-timeline [examinations]="examinations()" />

@@ -12,6 +12,7 @@ const TYPE_ICON: Record<ExaminationType, string> = {
   ct: 'pi-image',
   mri: 'pi-image',
   parameters: 'pi-chart-line',
+  clinical_scale: 'pi-calculator',
 };
 
 @Component({
@@ -36,6 +37,7 @@ export class ResultsTimeline {
   protected typeLabelKey(type: ExaminationType): string {
     if (type === 'audio') return 'examinations.audioDiagnostic';
     if (type === 'parameters') return 'examinations.parameterDiagnostic';
+    if (type === 'clinical_scale') return 'clinicalScales.tabTitle';
     return 'examType.' + type;
   }
 }
